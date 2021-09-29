@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Draw a polygon and calculate its area</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.js"></script>
+
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.css"
+        type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .calculation-box {
+            height: 75px;
+            width: 150px;
+            position: absolute;
+            bottom: 40px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            text-align: center;
+        }
+
+        p {
+            font-family: 'Open Sans';
+            margin: 0;
+            font-size: 13px;
+        }
+
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            max-width: 300px;
+            z-index: 1000;
+            background-color: white;
+            padding: 20px;
+            display: none;
+        }
+
+        .tab {
+            border-right: 1px solid gray;
+            padding-right: 10px;
+            margin: 0px 0px 10px 10px;
+        }
+
+        .eighty {
+            height: 90vh;
+            display: flex;
+        }
+
+        .twenty {
+            height: 10vh;
+            display: flex;
+            align-content: center;
+            align-items: center;
+            justify-content: center;
+        }
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div class="container-fluid">
+        <div class="twenty">
+            <div id="panel" class="d-flex ">
+                <div id="points" class="tab">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Geo Point</label>
+                    </div>
+
+                    <div class="d-flex ">
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                P
+                            </label>
+                        </div>
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                B
+                            </label>
+                        </div>
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                F
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="points" class="tab">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Geo DOTS</label>
+                    </div>
+
+                    <div class="d-flex ">
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                P
+                            </label>
+                        </div>
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                B
+                            </label>
+                        </div>
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                F
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="points" class="tab">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Load existing polygons</label>
+                    </div>
+
+                    <div class="d-flex ">
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                A
+                            </label>
+                        </div>
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                B
+                            </label>
+                        </div>
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                C
+                            </label>
+                        </div>
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                Sub region
+                            </label>
+                        </div>
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                Region
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div id="points" class="tab">
+                    <label class="form-check-label" for="flexSwitchCheckDefault">Type of polygon to draw</label>
+
+                    <div class="d-flex ">
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                A
+                            </label>
+                        </div>
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                B
+                            </label>
+                        </div>
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                C
+                            </label>
+                        </div>
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                Sub region
+                            </label>
+                        </div>
+                        <div class="form-check m-1">
+                            <input class="form-check-input" type="checkbox" value="" id="P">
+                            <label class="form-check-label" for="P">
+                                Region
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div id="points" class="tab">
+                    <div>
+                        <div>Login as User name </div>
+                        <button type="button" class="btn btn-secondary btn-sm">Logout</button>
+                        <button type="button" class="btn btn-secondary btn-sm">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="eighty">
+            <div id="info"></div>
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <script>
+        const info = document.getElementById("info")
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic2Vyc2Vyc2VyIiwiYSI6ImNrZnBpaWF5azBpMWMyeHBmdzJpdno1NzgifQ.4vBDF2DNuk-beXljllf3Yg';
+        const map = new mapboxgl.Map({
+            container: 'map', // container ID
+            style: 'mapbox://styles/mapbox/satellite-v9', // style URL
+            center: [-91.874, 42.76], // starting position [lng, lat]
+            zoom: 2 // starting zoom
+        });
+
+        const draw = new MapboxDraw({
+            displayControlsDefault: false,
+            // Select which mapbox-gl-draw control buttons to add to the map.
+            controls: {
+                polygon: true,
+                trash: true
+            },
+            // Set mapbox-gl-draw to draw by default.
+            // The user does not have to click the polygon control button first.
+            defaultMode: 'draw_polygon'
+        });
+        map.addControl(draw);
+
+        map.on('draw.create', updateArea);
+        map.on('draw.delete', updateArea);
+        map.on('draw.update', updateArea);
+        map.on('draw.selectionchange', updateProps);
+
+
+        function updateProps(geometry) {
+            console.log('props', geometry);
+
+            if (geometry.features.length > 0) {
+                //show info block with params
+                info.style.display = "inline"
+                info.innerHTML = JSON.stringify(geometry.features[0])
+            } else {
+                info.style.display = "none"
+            }
+        }
+
+        function updateArea(e) {
+            const data = draw.getAll();
+        }
+    </script>
+
+</body>
+
+</html>
