@@ -1,60 +1,60 @@
 const tablesAndProps = { //all fields that should be send to DB 
     'poly_an': {
         fields: [
-            'poly_an_id',
-            'poly_an_name',
-            'p_id',
-            'working',
-            'default_ops',
-            'c_cat',
-            'c_type',
-            'recv_type',
-            'poly_array',
-            'userid'
+            { name: 'poly_an_id', type: "input" },
+            { name: 'poly_an_name', type: "input" },
+            { name: 'p_id', type: "input" },
+            { name: 'working', type: "dropdown" },
+            { name: 'default_ops', type: "dropdown" },
+            { name: 'c_cat', type: "dropdown" },
+            { name: 'c_type', type: "dropdown" },
+            { name: 'recv_type', type: "dropdown" },
+            { name: 'poly_array', type: "input" },
+            { name: 'userid', type: "input" },
         ]
     },
     'poly_b': {
         fields: [
-            'poly_b_id',
-            'b_id',
-            'default_ops',
-            'c_cat',
-            'c_type',
-            'recv_type',
-            'poly_array',
-            'userid',
+            { name: 'poly_b_id', type: "input" },
+            { name: 'b_id', type: "input" },
+            { name: 'default_ops', type: "dropdown" },
+            { name: 'c_cat', type: "dropdown" },
+            { name: 'c_type', type: "dropdown" },
+            { name: 'recv_type', type: "dropdown" },
+            { name: 'poly_array', type: "input" },
+            { name: 'userid', type: "input" },
 
         ]
     },
     'poly_p': {
         fields: [
-            'poly_p_id',
-            'p_id',
-            'p_group',
-            'poly_array',
-            'userid',
+            { name: 'poly_p_id', type: "input" },
+            { name: 'p_id', type: "input" },
+            { name: 'p_group', type: "dropdown" },
+            { name: 'poly_array', type: "input" },
+            { name: 'userid', type: "input" },
         ]
     },
     'poly_s_r': {
         fields: [
-            'poly_sr_id',
-            's_r_name',
-            'r_name',
-            'poly_array',
-            'userid',
+            { name: 'poly_sr_id', type: "input" },
+            { name: 's_r_name', type: "input" },
+            { name: 'r_name', type: "dropdown" },
+            { name: 'poly_array', type: "input" },
+            { name: 'userid', type: "input" },
         ]
     },
     'poly_r': {
         fields: [
-            'poly_r_id',
-            'r_name',
-            'poly_array',
-            'userid',
+            { name: 'poly_r_id', type: "hidden" },
+            { name: 'r_name', type: "input" },
+            { name: 'poly_array', type: "hidden" },
+            { name: 'userid', type: "hidden" },
         ]
     },
 }
 
-
+let selectedPolygonType = ""
 
 
 //const info = document.getElementById("info");
@@ -124,6 +124,7 @@ loadExistingPolygons.addEventListener("change", () => {
 let popup;
 function updateProps(geometry) {
     console.log('props', geometry);
+    if (popup) popup.remove();
 
     if (geometry.features.length > 0) {
         //show info block with params
@@ -143,11 +144,7 @@ function updateProps(geometry) {
                 .addTo(map);
         }
 
-    } else {
-        console.log('popup', popup);
-        if (popup) popup.remove();
-
-    }
+    } 
 }
 
 function buildInput(id, displayName, currentValue) {
@@ -159,12 +156,12 @@ function buildInput(id, displayName, currentValue) {
         </div>
     `
 }
-function buildDropDown(id, dataArray) {
+function buildDropDown(id, displayName, dataArray) {
     if (dataArray.length <= 0) return;
     const list = dataArray.map(i => `<option value="${i}">${i}</option>`)
     return `
     <div class="row mb-2">
-        <label class="col-sm-3 col-form-label col-form-label-sm">working</label>
+        <label class="col-sm-3 col-form-label col-form-label-sm">${displayName}</label>
         <div class="col-sm-8">
             <select class="form-select form-select-sm" id="${id}">${list}</select>
         </div>
@@ -177,12 +174,41 @@ function buildPropsByPolygonType(table_id) {
 
     if (!table_id) table_id = "";
 
+    if (!selectedPolygonType) { console.warn("Type of the polygon is not defined"); return; }
+    if (!tablesAndProps[selectedPolygonType]) { console.warn("No props for this type of polygon"); return; }
+
+
+    const fields = tablesAndProps[selectedPolygonType].fields.map(i => {
+
+        let res;
+        if (i.type === "input") {
+            res = buildInput(i.name, i.name, "")
+        }
+
+        if (i.type === "dropdown") {
+            res = buildDropDown(i.name, i.name, ["123", "test"])
+        }
+
+        if (i.type === "hidden") {
+            res = buildInput(i.name, i.name, "")
+        }
+
+
+        return res
+    })
+
+    /*
+    ${buildInput('poly_an_name', 'poly an name', "")}
+    ${buildInput('P ID', 'p_id', "")}
+    ${buildDropDown('working', ['test a ', 'test b '])}
+    */
+
     const type_an = `
+    <h3>${selectedPolygonType}</h3>
+
     <div class="dataBlock" table_id="${table_id}" style="display:flex;flex-direction: column;">
 
-        ${buildInput('poly_an_name', 'poly an name', "")}
-        ${buildInput('P ID', 'p_id', "")}
-        ${buildDropDown('working', ['test a ', 'test b '])}
+        ${fields.join("")}    
 
         <div class="col-auto">
             <button class="saveButton btn btn-primary">Save</button>
@@ -201,6 +227,13 @@ document.addEventListener("click", e => {
         console.log('SAVE button');
     }
 
+
+    const selectedPType = Array.from(document.getElementsByName('polygonType')).filter(i => i.checked)
+    if (selectedPType.length > 0) {
+        const type = selectedPType[0].id
+        console.log('POLYGON type', type);
+        selectedPolygonType = type
+    }
 })
 
 
