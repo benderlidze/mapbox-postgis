@@ -15,9 +15,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <style>
-        body {
-            margin: 0;
-            padding: 0;
+        body,
+        html {
+            height: 100%;
         }
 
         #map {
@@ -54,182 +54,178 @@
         }
 
         .tab {
-            border-right: 1px solid gray;
-            padding-right: 10px;
+            border-bottom: 1px solid gray;
+            padding-bottom: 10px;
             margin: 0px 0px 10px 10px;
-        }
-
-        .eighty {
-            height: 90vh;
-            display: flex;
-        }
-
-        .twenty {
-            height: 10vh;
-            display: flex;
-            align-content: center;
-            align-items: center;
-            justify-content: center;
-        }
         }
     </style>
 </head>
 
 <body>
 
+    <div id="info"></div>
+    <div class="h-100  m-0 p-0">
+        <div class="row h-100 m-0 p-0">
+            <div class="col-md-3 m-0 p-0">
+                <div id="panel" class="d-flex flex-column">
+                    <div id="points" class="tab">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="geoPoint">
+                            <label class="form-check-label" for="geoPoint">Geo Point</label>
+                        </div>
 
-    <div class="container-fluid">
-        <div class="twenty">
-            <div id="panel" class="d-flex ">
-                <div id="points" class="tab">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
-                        <label class="form-check-label" for="flexSwitchCheckDefault">Geo Point</label>
+                        <div class="d-flex ">
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    P
+                                </label>
+                            </div>
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    B
+                                </label>
+                            </div>
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    F
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="d-flex ">
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                P
-                            </label>
+                    <div id="points" class="tab">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="dots">
+                            <label class="form-check-label" for="dots">Geo DOTS</label>
                         </div>
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                B
-                            </label>
-                        </div>
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                F
-                            </label>
-                        </div>
-                    </div>
-                </div>
 
-                <div id="points" class="tab">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="dots">
-                        <label class="form-check-label" for="dots">Geo DOTS</label>
-                    </div>
-
-                    <div class="d-flex ">
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                P
-                            </label>
+                        <div class="d-flex ">
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    P
+                                </label>
+                            </div>
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    B
+                                </label>
+                            </div>
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    F
+                                </label>
+                            </div>
                         </div>
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                B
-                            </label>
-                        </div>
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                F
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="points" class="tab">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
-                        <label class="form-check-label" for="flexSwitchCheckDefault">Load existing polygons</label>
                     </div>
 
-                    <div class="d-flex ">
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                A
-                            </label>
+                    <div id="points" class="tab">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="loadExistingPolygons">
+                            <label class="form-check-label" for="loadExistingPolygons">Load existing polygons</label>
                         </div>
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                B
-                            </label>
-                        </div>
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                C
-                            </label>
-                        </div>
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                Sub region
-                            </label>
-                        </div>
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                Region
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                <div id="points" class="tab">
-                    <label class="form-check-label" for="flexSwitchCheckDefault">Type of polygon to draw</label>
 
-                    <div class="d-flex ">
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                A
-                            </label>
+                        <div class="d-flex ">
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    A
+                                </label>
+                            </div>
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    B
+                                </label>
+                            </div>
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    C
+                                </label>
+                            </div>
                         </div>
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                B
-                            </label>
-                        </div>
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                C
-                            </label>
-                        </div>
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                Sub region
-                            </label>
-                        </div>
-                        <div class="form-check m-1">
-                            <input class="form-check-input" type="checkbox" value="" id="P">
-                            <label class="form-check-label" for="P">
-                                Region
-                            </label>
+                        <div>
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    Sub region
+                                </label>
+                            </div>
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    Region
+                                </label>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div id="points" class="tab">
-                    <div>
-                        <div>Login as User name </div>
-                        <button type="button" class="btn btn-secondary btn-sm">Logout</button>
-                        <button type="button" class="btn btn-secondary btn-sm">Save</button>
+                    <div id="points" class="tab">
+                        <label class="form-check-label" for="flexSwitchCheckDefault">Type of polygon to draw</label>
+
+                        <div class="d-flex ">
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    A
+                                </label>
+                            </div>
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    B
+                                </label>
+                            </div>
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    C
+                                </label>
+                            </div>
+                            </div>
+                            <div>
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    Sub region
+                                </label>
+                            </div>
+                            <div class="form-check m-1">
+                                <input class="form-check-input" type="checkbox" value="" id="P">
+                                <label class="form-check-label" for="P">
+                                    Region
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="points" class="tab">
+                        <div>
+                            <div>Login as User name </div>
+                            <button type="button" class="btn btn-secondary btn-sm">Logout</button>
+                            <button type="button" id="savePolygon" class="btn btn-secondary btn-sm">Save</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="eighty">
-            <div id="info"></div>
-            <div id="map"></div>
+            <div class="col-md-9 m-0 p-0">
+                <div id="map"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        const info = document.getElementById("info")
+
+        const info = document.getElementById("info");
+        const loadExistingPolygons = document.getElementById("loadExistingPolygons");
+        const savePolygon = document.getElementById("savePolygon")
+
+        const serverApiURL = 'http://176.223.134.242/~test/API.php';
+
         mapboxgl.accessToken = 'pk.eyJ1Ijoic2Vyc2Vyc2VyIiwiYSI6ImNrZnBpaWF5azBpMWMyeHBmdzJpdno1NzgifQ.4vBDF2DNuk-beXljllf3Yg';
         const map = new mapboxgl.Map({
             container: 'map', // container ID
@@ -256,6 +252,28 @@
         map.on('draw.update', updateArea);
         map.on('draw.selectionchange', updateProps);
 
+        //save button 
+        savePolygon.addEventListener("click", () => {
+
+            const data = draw.getSelected();
+            if (data.features.length > 0) {//we have at least one selected polygon
+
+                data.features[0].geometry['crs'] = { "type": "name", "properties": { "name": "EPSG:3857" } };
+                savePolygonData(data.features[0].geometry)
+                draw.changeMode("simple_select")
+            }
+
+        })
+
+        loadExistingPolygons.addEventListener("change", () => {
+            console.log('loadExistingPolygons', loadExistingPolygons);
+            if (loadExistingPolygons.checked) {
+                //load selected polygons 
+                fetchPolygonData()
+            } else {
+                //remove all loaded polygons
+            }
+        })
 
         function updateProps(geometry) {
             console.log('props', geometry);
@@ -271,6 +289,38 @@
 
         function updateArea(e) {
             const data = draw.getAll();
+        }
+
+
+        function savePolygonData(polygonData) {
+
+            console.log('polygonData', polygonData);
+            if (!polygonData || polygonData === "") { console.warn("Empty data"); return; }
+
+            const userName = "USER NAME";
+            fetch(serverApiURL, {
+                method: 'post',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userName: userName,
+                    polygon: polygonData
+                })
+            })
+                .then(res => res.json())
+                .then(res => console.log(res));
+
+        }
+
+
+        async function fetchPolygonData() {
+
+            const f = await fetch(serverApiURL + "?getPolygons=true");
+            const j = await f.json()
+
+            console.log('j',j);
         }
     </script>
 
