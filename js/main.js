@@ -1,7 +1,65 @@
-const info = document.getElementById("info");
+const tablesAndProps = { //all fields that should be send to DB 
+    'poly_an': {
+        fields: [
+            'poly_an_id',
+            'poly_an_name',
+            'p_id',
+            'working',
+            'default_ops',
+            'c_cat',
+            'c_type',
+            'recv_type',
+            'poly_array',
+            'userid'
+        ]
+    },
+    'poly_b': {
+        fields: [
+            'poly_b_id',
+            'b_id',
+            'default_ops',
+            'c_cat',
+            'c_type',
+            'recv_type',
+            'poly_array',
+            'userid',
+
+        ]
+    },
+    'poly_p': {
+        fields: [
+            'poly_p_id',
+            'p_id',
+            'p_group',
+            'poly_array',
+            'userid',
+        ]
+    },
+    'poly_s_r': {
+        fields: [
+            'poly_sr_id',
+            's_r_name',
+            'r_name',
+            'poly_array',
+            'userid',
+        ]
+    },
+    'poly_r': {
+        fields: [
+            'poly_r_id',
+            'r_name',
+            'poly_array',
+            'userid',
+        ]
+    },
+}
+
+
+
+
+//const info = document.getElementById("info");
 const loadExistingPolygons = document.getElementById("loadExistingPolygons");
 const savePolygon = document.getElementById("savePolygon")
-
 const allPolygons = [];
 
 const serverApiURL = 'http://176.223.134.242/~test/API.php';
@@ -69,8 +127,6 @@ function updateProps(geometry) {
 
     if (geometry.features.length > 0) {
         //show info block with params
-        info.style.display = "inline"
-        info.innerHTML = JSON.stringify(geometry.features[0])
 
         const center = turf.centerOfMass(geometry.features[0]);
         console.log('center', center);
@@ -91,27 +147,65 @@ function updateProps(geometry) {
         console.log('popup', popup);
         if (popup) popup.remove();
 
-        info.style.display = "none"
     }
 }
 
+function buildInput(id, displayName, currentValue) {
+    return ` <div class="row mb-2">
+        <label class="col-sm-3 col-form-label col-form-label-sm" style="white-space: nowrap;">${displayName}</label>
+        <div class="col-sm-8">
+        <input type="email" class="form-control form-control-sm" id="${id}e" value="${currentValue}">
+        </div>
+        </div>
+    `
+}
+function buildDropDown(id, dataArray) {
+    if (dataArray.length <= 0) return;
+    const list = dataArray.map(i => `<option value="${i}">${i}</option>`)
+    return `
+    <div class="row mb-2">
+        <label class="col-sm-3 col-form-label col-form-label-sm">working</label>
+        <div class="col-sm-8">
+            <select class="form-select form-select-sm" id="${id}">${list}</select>
+        </div>
+    </div>
+    `
 
+}
 
-function buildPropsByPolygonType() {
+function buildPropsByPolygonType(table_id) {
 
+    if (!table_id) table_id = "";
 
-    const type_an = `<div style="display:flex;">
-        <div class="itemRow">
-            <div class="item">poly_an_name</div>
-            <div class="item"><input type="text" id="poly_an_name"></div>
+    const type_an = `
+    <div class="dataBlock" table_id="${table_id}" style="display:flex;flex-direction: column;">
+
+        ${buildInput('poly_an_name', 'poly an name', "")}
+        ${buildInput('P ID', 'p_id', "")}
+        ${buildDropDown('working', ['test a ', 'test b '])}
+
+        <div class="col-auto">
+            <button class="saveButton btn btn-primary">Save</button>
+            <button class="remove btn btn-primary">Remove</button>
         </div>
     </div>`
 
-
-
-
     const text = type_an;
     return text;
+}
+
+
+document.addEventListener("click", e => {
+
+    if (e.target.classList.contains("saveButton")) {
+        console.log('SAVE button');
+    }
+
+})
+
+
+function savePolygonAndData() {
+
 }
 
 function updateArea(e) {

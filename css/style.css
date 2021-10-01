@@ -48,9 +48,10 @@ p {
     align-content: center;
     align-items: center;
     width: 100%;
+    margin:3px;
 }
 
 .mapboxgl-popup-content {
-    width: 300px;
+    width: 400px;
     padding: 10px 10px 15px;
 }
