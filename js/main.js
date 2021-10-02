@@ -9,8 +9,8 @@ const tablesAndProps = { //all fields that should be send to DB
             { name: 'c_cat', type: "dropdown" },
             { name: 'c_type', type: "dropdown" },
             { name: 'recv_type', type: "dropdown" },
-            { name: 'poly_array', type: "input" },
-            { name: 'userid', type: "input" },
+            // { name: 'poly_array', type: "input" },
+            // { name: 'userid', type: "input" },
         ]
     },
     'poly_b': {
@@ -21,8 +21,8 @@ const tablesAndProps = { //all fields that should be send to DB
             { name: 'c_cat', type: "dropdown" },
             { name: 'c_type', type: "dropdown" },
             { name: 'recv_type', type: "dropdown" },
-            { name: 'poly_array', type: "input" },
-            { name: 'userid', type: "input" },
+            // { name: 'poly_array', type: "input" },
+            // { name: 'userid', type: "input" },
 
         ]
     },
@@ -31,8 +31,8 @@ const tablesAndProps = { //all fields that should be send to DB
             { name: 'poly_p_id', type: "input" },
             { name: 'p_id', type: "input" },
             { name: 'p_group', type: "dropdown" },
-            { name: 'poly_array', type: "input" },
-            { name: 'userid', type: "input" },
+            // { name: 'poly_array', type: "input" },
+            // { name: 'userid', type: "input" },
         ]
     },
     'poly_s_r': {
@@ -40,23 +40,22 @@ const tablesAndProps = { //all fields that should be send to DB
             { name: 'poly_sr_id', type: "input" },
             { name: 's_r_name', type: "input" },
             { name: 'r_name', type: "dropdown" },
-            { name: 'poly_array', type: "input" },
-            { name: 'userid', type: "input" },
+            // { name: 'poly_array', type: "input" },
+            // { name: 'userid', type: "input" },
         ]
     },
     'poly_r': {
         fields: [
             { name: 'poly_r_id', type: "hidden" },
             { name: 'r_name', type: "input" },
-            { name: 'poly_array', type: "hidden" },
-            { name: 'userid', type: "hidden" },
+            // { name: 'poly_array', type: "hidden" },
+            // { name: 'userid', type: "hidden" },
         ]
     },
 }
 
 let selectedPolygonType = ""
-
-
+let dataForDropdownLists = ""
 //const info = document.getElementById("info");
 const loadExistingPolygons = document.getElementById("loadExistingPolygons");
 const savePolygon = document.getElementById("savePolygon")
@@ -83,24 +82,23 @@ const draw = new MapboxDraw({
     // The user does not have to click the polygon control button first.
     //defaultMode: 'draw_polygon'
 });
-map.addControl(draw);
+map.addControl(draw, 'top-left');
 
 map.on('draw.create', updateArea);
 map.on('draw.delete', updateArea);
 map.on('draw.update', updateArea);
 map.on('draw.selectionchange', updateProps);
 
+fetchDataForDropdownLists();
+
 //save button 
 savePolygon.addEventListener("click", () => {
-
     const data = draw.getSelected();
     if (data.features.length > 0) {//we have at least one selected polygon
-
         data.features[0].geometry['crs'] = { "type": "name", "properties": { "name": "EPSG:3857" } };
         savePolygonData(data.features[0].geometry)
         draw.changeMode("simple_select")
     }
-
 })
 
 loadExistingPolygons.addEventListener("change", () => {
@@ -144,7 +142,7 @@ function updateProps(geometry) {
                 .addTo(map);
         }
 
-    } 
+    }
 }
 
 function buildInput(id, displayName, currentValue) {
@@ -268,6 +266,18 @@ function savePolygonData(polygonData) {
 
 }
 
+
+async function fetchDataForDropdownLists() {
+
+    const f = await fetch(serverApiURL + "?getDataForDropdown=true");
+    const j = await f.json()
+    console.log('j', j);
+    if (j && j.error === "" && j.data.length > 0) {
+        dataForDropdownLists = j;
+        console.log('j', j);
+    }
+
+}
 
 async function fetchPolygonData() {
 

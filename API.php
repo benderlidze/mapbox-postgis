@@ -35,13 +35,17 @@ if (isset($_GET['getPolygons'])) {
 	}
 
 	while ($row = pg_fetch_assoc($result)) {
-		//echo ($row['poly']);
-		//echo '<hr>';
+			
+		$poly = array(
+		'type'=>'Feature',
+		'properties'=>array(
+				'name'=>$row['poly_an_name'],
+				'id'=>$row['p_id']
+			),
+		'geometry'=>json_decode($row['poly'])
+		); 
 		
-		$data[] = array(
-			'name'=>"Some name",
-			'geometry'=>json_decode($row['poly'])
-		);
+		$data[] = $poly;
 	}
 	
 	
@@ -53,21 +57,62 @@ if (isset($_GET['getPolygons'])) {
 	
 }
 
-/*
- $result = pg_query_params($dbconn, 'INSERT INTO poly_an (poly_an_name, poly) VALUES ($1,ST_GeomFromGeoJSON($2))',
- array("NAME",'{
- "type":"Polygon",
- "coordinates":
- [
- [
- [-91.23046875,45.460130637921],
- [-79.8046875,49.837982453085],
- [-69.08203125,43.452918893555],
- [-88.2421875,32.694865977875],
- [-91.23046875,45.460130637921]
- ]
- ],
- "crs":{"type":"name","properties":{"name":"EPSG:3857"}}
- }'));
- */
+//OPTIONS FOR DROP DOW LIST
+if (isset($_GET['getDataForDropdown'])) {
+
+	$cgo = [];
+	$default_ops = [];
+	$recv_type = [];
+	$data = [];
+	$error = '';
+
+	// ------------- CGO -----------------------	
+	$result = pg_query($dbconn, 'SELECT * FROM "public"."ref_cgo"');
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$cgo[] = array(
+				'cgo_id'=>$row['cgo_id'],
+				'cgo_value'=>$row['cgo_value'],
+				'cgo_type'=>$row['cgo_type'],
+		);
+	}
+	$data['cgo'] = $cgo;
+	
+	// ------------- CGO -----------------------	
+	$result = pg_query($dbconn, 'SELECT * FROM "public"."ref_default_ops"');
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$default_ops[] = array(
+				'default_ops_id'=>$row['default_ops_id'],
+				'default_ops_value'=>$row['default_ops_value'],
+		);
+	}
+	$data['default_ops'] = $default_ops;
+	
+	// ------------- CGO -----------------------	
+	$result = pg_query($dbconn, 'SELECT * FROM "public"."ref_recv_type"');
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$recv_type[] = array(
+				'recv_type_id'=>$row['recv_type_id'],
+				'recv_type'=>$row['recv_type'],
+		);
+	}
+	$data['recv_type'] = $recv_type;
+	
+	
+	
+	$results = array(
+		'error'=>$error,
+		'data'=>$data
+	);
+	echo json_encode($results);
+	
+}
 ?>
