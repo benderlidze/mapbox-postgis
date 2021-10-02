@@ -157,8 +157,10 @@ function buildInput(id, displayName, currentValue) {
     `
 }
 function buildDropDown(id, displayName, dataArray, callback) {
-    if (dataArray.length <= 0) return;
 
+    let disabled=""
+    if (dataArray.length <= 0) disabled="disabled";
+    
     let onchange = "";
     if (callback) {
         onchange = `onchange="${callback}"`;
@@ -168,7 +170,7 @@ function buildDropDown(id, displayName, dataArray, callback) {
     <div class="row mb-2">
         <label class="col-sm-3 col-form-label col-form-label-sm">${displayName}</label>
         <div class="col-sm-8">
-            <select class="form-select form-select-sm" id="${id}" ${onchange}>${list}</select>
+            <select class="form-select form-select-sm" id="${id}" ${disabled} ${onchange}>${list}</select>
         </div>
     </div>
     `
@@ -177,6 +179,7 @@ function buildDropDown(id, displayName, dataArray, callback) {
 function updateVal() {
 
     console.log('this', this);
+    document.getElementById("c_type").removeAttribute("disabled");
     document.getElementById("c_type").innerHTML = dataForDropdownLists.data.cgo
         .filter(i => i.cgo_value === document.getElementById("c_cat").value)
         .map(i => `<option value="${i.cgo_id}">${i.cgo_type}</option>`)
@@ -232,6 +235,8 @@ function buildPropsByPolygonType(table_id) {
 
             if (i.name === 'c_cat') {
                 res = buildDropDown(i.name, i.name, data, `updateVal()`)
+            } else if (i.name === 'c_type') {
+                res = buildDropDown(i.name, i.name, [])
             } else {
                 res = buildDropDown(i.name, i.name, data)
             }
