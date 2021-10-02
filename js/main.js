@@ -56,6 +56,8 @@ const tablesAndProps = { //all fields that should be send to DB
 
 let selectedPolygonType = ""
 let dataForDropdownLists = ""
+let s;
+
 //const info = document.getElementById("info");
 const loadExistingPolygons = document.getElementById("loadExistingPolygons");
 const savePolygon = document.getElementById("savePolygon")
@@ -154,17 +156,30 @@ function buildInput(id, displayName, currentValue) {
         </div>
     `
 }
-function buildDropDown(id, displayName, dataArray) {
+function buildDropDown(id, displayName, dataArray, callback) {
     if (dataArray.length <= 0) return;
-    const list = dataArray.map(i => `<option value="${i}">${i}</option>`)
+
+    let onchange = "";
+    if (callback) {
+        onchange = `onchange="${callback}"`;
+    }
+    const list = dataArray.map(i => `<option value="${i.id}">${i.val}</option>`)
     return `
     <div class="row mb-2">
         <label class="col-sm-3 col-form-label col-form-label-sm">${displayName}</label>
         <div class="col-sm-8">
-            <select class="form-select form-select-sm" id="${id}">${list}</select>
+            <select class="form-select form-select-sm" id="${id}" ${onchange}>${list}</select>
         </div>
     </div>
     `
+}
+
+function updateVal() {
+
+    console.log('this', this);
+    document.getElementById("c_type").innerHTML = dataForDropdownLists.data.cgo
+        .filter(i => i.cgo_value === document.getElementById("c_cat").value)
+        .map(i => `<option value="${i.cgo_id}">${i.cgo_type}</option>`)
 
 }
 
@@ -184,7 +199,43 @@ function buildPropsByPolygonType(table_id) {
         }
 
         if (i.type === "dropdown") {
-            res = buildDropDown(i.name, i.name, ["123", "test"])
+
+
+            if (i.name === 'c_cat') {
+                data = [...new Set(dataForDropdownLists.data.cgo.map(i => i.cgo_value))].map(i => {
+                    return { id: i, val: i }
+                })
+            }
+            if (i.name === 'c_type') {
+                data = dataForDropdownLists.data.cgo.map(i => {
+                    return { id: i.cgo_id, val: i.cgo_value }
+                })
+            }
+            if (i.name === 'default_ops') {
+                data = dataForDropdownLists.data.default_ops.map(i => {
+                    return { id: i.default_ops_id, val: i.default_ops_value }
+                })
+            }
+            if (i.name === 'recv_type') {
+                data = dataForDropdownLists.data.recv_type.map(i => {
+                    return { id: i.recv_type_id, val: i.recv_type }
+                })
+            }
+            if (i.name === 'working') {
+                data = [
+                    { id: 'true', val: 'Yes' },
+                    { id: 'false', val: 'No' },
+                ]
+            }
+
+            console.log('i.name', i.name);
+
+            if (i.name === 'c_cat') {
+                res = buildDropDown(i.name, i.name, data, `updateVal()`)
+            } else {
+                res = buildDropDown(i.name, i.name, data)
+            }
+
         }
 
         if (i.type === "hidden") {
@@ -268,15 +319,11 @@ function savePolygonData(polygonData) {
 
 
 async function fetchDataForDropdownLists() {
-
     const f = await fetch(serverApiURL + "?getDataForDropdown=true");
     const j = await f.json()
-    console.log('j', j);
-    if (j && j.error === "" && j.data.length > 0) {
+    if (j && j.error === "") {
         dataForDropdownLists = j;
-        console.log('j', j);
     }
-
 }
 
 async function fetchPolygonData() {
