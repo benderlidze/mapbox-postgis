@@ -58,6 +58,8 @@ let selectedPolygonType = ""
 let dataForDropdownLists = ""
 let s;
 
+const userName = "USER NAME";
+
 //const info = document.getElementById("info");
 const loadExistingPolygons = document.getElementById("loadExistingPolygons");
 const savePolygon = document.getElementById("savePolygon")
@@ -151,16 +153,16 @@ function buildInput(id, displayName, currentValue) {
     return ` <div class="row mb-2">
         <label class="col-sm-3 col-form-label col-form-label-sm" style="white-space: nowrap;">${displayName}</label>
         <div class="col-sm-8">
-        <input type="email" class="form-control form-control-sm" id="${id}e" value="${currentValue}">
+        <input type="email" class="form-control form-control-sm" id="${id}" value="${currentValue}">
         </div>
         </div>
     `
 }
 function buildDropDown(id, displayName, dataArray, callback) {
 
-    let disabled=""
-    if (dataArray.length <= 0) disabled="disabled";
-    
+    let disabled = ""
+    if (dataArray.length <= 0) disabled = "disabled";
+
     let onchange = "";
     if (callback) {
         onchange = `onchange="${callback}"`;
@@ -265,7 +267,7 @@ function buildPropsByPolygonType(table_id) {
         ${fields.join("")}    
 
         <div class="col-auto">
-            <button class="saveButton btn btn-primary">Save</button>
+            <button class="saveButton btn btn-primary savePolygonData">Save</button>
             <button class="remove btn btn-primary">Remove</button>
         </div>
     </div>`
@@ -285,14 +287,56 @@ document.addEventListener("click", e => {
     const selectedPType = Array.from(document.getElementsByName('polygonType')).filter(i => i.checked)
     if (selectedPType.length > 0) {
         const type = selectedPType[0].id
-        console.log('POLYGON type', type);
         selectedPolygonType = type
     }
+
+    if (e.target.classList.contains("savePolygonData")) {
+        console.log('savePolygonData');
+        savePolygonAndData();
+    }
+
 })
 
 
 function savePolygonAndData() {
 
+    console.log('POLYGON type', selectedPolygonType);
+
+    const selection = draw.getSelected();
+    if (selection.features.length === 0) { console.warn('Nothing to save! Select the polygon.'); return; }
+
+    const polygon = selection.features[0].geometry
+    console.log('polygon', polygon);
+
+    const results = [];
+    const fields = tablesAndProps[selectedPolygonType].fields;
+    console.log('fields', fields);
+
+    fields.forEach(i => {
+        console.log('i', i);
+        const node = document.getElementById(i.name)
+        results.push({ name: i.name, value: node.value })
+    })
+
+    console.log('results', results);
+
+    //SEND DATA TO SERVER
+    fetch(serverApiURL, {
+        method: 'post',
+        headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            userName: userName,
+            polygon: polygon,
+            selectedPolygonType: selectedPolygonType,
+            data: results
+        })
+    })
+        .then(res => res.json())
+        .then(res => console.log(res));
+         
 }
 
 function updateArea(e) {
@@ -305,7 +349,6 @@ function savePolygonData(polygonData) {
     console.log('polygonData', polygonData);
     if (!polygonData || polygonData === "") { console.warn("Empty data"); return; }
 
-    const userName = "USER NAME";
     fetch(serverApiURL, {
         method: 'post',
         headers: {
