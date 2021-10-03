@@ -1,9 +1,10 @@
+
 const tablesAndProps = { //all fields that should be send to DB 
     'poly_an': {
         fields: [
-            { name: 'poly_an_id', type: "input" },
+            { name: 'poly_an_id', type: "input", checkType: 'INTEGER' },
             { name: 'poly_an_name', type: "input" },
-            { name: 'p_id', type: "input" },
+            { name: 'p_id', type: "input", checkType: 'INTEGER' },
             { name: 'working', type: "dropdown" },
             { name: 'default_ops', type: "dropdown" },
             { name: 'c_cat', type: "dropdown" },
@@ -11,52 +12,60 @@ const tablesAndProps = { //all fields that should be send to DB
             { name: 'recv_type', type: "dropdown" },
             // { name: 'poly_array', type: "input" },
             // { name: 'userid', type: "input" },
-        ]
+        ],
+        layerColor: "orange"
     },
     'poly_b': {
         fields: [
-            { name: 'poly_b_id', type: "input" },
-            { name: 'b_id', type: "input" },
+            { name: 'b_id', type: "input", checkType: 'INTEGER' },
             { name: 'default_ops', type: "dropdown" },
             { name: 'c_cat', type: "dropdown" },
             { name: 'c_type', type: "dropdown" },
             { name: 'recv_type', type: "dropdown" },
+            { name: 'b_name', type: "input" },
+            { name: 'p_name', type: "input" },
             // { name: 'poly_array', type: "input" },
             // { name: 'userid', type: "input" },
 
-        ]
+        ],
+        layerColor: "red"
     },
     'poly_p': {
         fields: [
-            { name: 'poly_p_id', type: "input" },
-            { name: 'p_id', type: "input" },
-            { name: 'p_group', type: "dropdown" },
+
+            { name: 'p_id', type: "input", checkType: 'INTEGER' },
+            { name: 'p_group', type: "input" },
+            { name: 'p_name', type: "input" },
             // { name: 'poly_array', type: "input" },
             // { name: 'userid', type: "input" },
-        ]
+        ],
+        layerColor: "blue"
     },
     'poly_s_r': {
         fields: [
-            { name: 'poly_sr_id', type: "input" },
-            { name: 's_r_name', type: "input" },
-            { name: 'r_name', type: "dropdown" },
+
+            { name: 'poly_s_r_name', type: "input" },
+            { name: 'r_name', type: "input" },
             // { name: 'poly_array', type: "input" },
             // { name: 'userid', type: "input" },
-        ]
+        ],
+        layerColor: "green"
     },
     'poly_r': {
         fields: [
-            { name: 'poly_r_id', type: "hidden" },
-            { name: 'r_name', type: "input" },
+            //{ name: 'poly_r_id', type: "hidden", checkType: 'INTEGER' },
+            { name: 'poly_r_name', type: "input" },
             // { name: 'poly_array', type: "hidden" },
             // { name: 'userid', type: "hidden" },
-        ]
+        ],
+        layerColor: "white"
     },
 }
 
 let selectedPolygonType = ""
 let dataForDropdownLists = ""
 let s;
+const allPolygonLayers = [];
 
 const userName = "USER NAME";
 
@@ -105,6 +114,35 @@ savePolygon.addEventListener("click", () => {
     }
 })
 
+
+Array.from(document.getElementsByName("load")).forEach(i => {
+
+    i.addEventListener("change", e => {
+        console.log('e.target.value', e.target.value);
+        toggleLayer(e.target.value);
+    })
+})
+
+function toggleLayer(layer) {
+
+    if (allPolygonLayers.includes(layer)) {
+        const index = allPolygonLayers.indexOf(layer);
+        if (index !== -1) {
+            allPolygonLayers.splice(index, 1);
+        }
+        //remove loaded polygons
+        map.removeLayer(layer);
+        map.removeSource(layer);
+
+    } else {
+        allPolygonLayers.push(layer)
+        fetchPolygonData(layer)
+    }
+
+
+
+}
+/*
 loadExistingPolygons.addEventListener("change", () => {
     console.log('loadExistingPolygons', loadExistingPolygons);
     if (loadExistingPolygons.checked) {
@@ -114,7 +152,6 @@ loadExistingPolygons.addEventListener("change", () => {
         //remove all loaded polygons
         allPolygons.forEach(i => {
             console.log('i', i);
-
             const id = i.name;
             map.removeLayer(id);
             map.removeSource(id);
@@ -122,7 +159,7 @@ loadExistingPolygons.addEventListener("change", () => {
         allPolygons.length = 0;
     }
 })
-
+*/
 let popup;
 function updateProps(geometry) {
     console.log('props', geometry);
@@ -300,26 +337,35 @@ document.addEventListener("click", e => {
 
 function savePolygonAndData() {
 
-    console.log('POLYGON type', selectedPolygonType);
+    const error = [];
 
     const selection = draw.getSelected();
     if (selection.features.length === 0) { console.warn('Nothing to save! Select the polygon.'); return; }
 
     const polygon = selection.features[0].geometry
-    console.log('polygon', polygon);
 
     const results = {};
     const fields = tablesAndProps[selectedPolygonType].fields;
-    console.log('fields', fields);
 
     fields.forEach(i => {
         console.log('i', i);
         const node = document.getElementById(i.name)
         //results.push({ name: i.name, value: node.value })
+
+        if (i.checkType && i.checkType === "INTEGER") {//check for input type
+            if (!isInt(node.value)) {
+                console.log('node.value!!!!', node.value);
+                error.push(`${i.name} must be integer`);
+            }
+        }
+
         results[i.name] = node.value;
     })
 
-    console.log('results', results);
+    if (error.length > 0) {
+        alert(error.join("\n"));
+        return;
+    }
 
     //SEND DATA TO SERVER
     fetch(serverApiURL, {
@@ -336,7 +382,11 @@ function savePolygonAndData() {
         })
     })
         .then(res => res.json())
-        .then(res => console.log(res));
+        .then(res => {
+            if (res.done === "ok") {
+                popup.remove()
+            }
+        });
 
 }
 
@@ -375,9 +425,9 @@ async function fetchDataForDropdownLists() {
     }
 }
 
-async function fetchPolygonData() {
+async function fetchPolygonData(layerId) {
 
-    const f = await fetch(serverApiURL + "?getPolygons=true");
+    const f = await fetch(serverApiURL + "?getPolygons=true&layerId=" + layerId);
     const j = await f.json()
     console.log('j', j);
     if (j && j.error === "" && j.data.length > 0) {
@@ -387,29 +437,33 @@ async function fetchPolygonData() {
         });
 
         const collection = turf.featureCollection(j.data);
-        const uniqueId = `polyLayer_${new Date().getTime()}`;
 
-        map.addSource(uniqueId, {
+        map.addSource(layerId, {
             'type': 'geojson',
             'data': collection
         });
 
         // Add a new layer to visualize the polygon.
         map.addLayer({
-            'id': uniqueId,
+            'id': layerId,
             'type': 'fill',
-            'source': uniqueId, // reference the data source
+            'source': layerId, // reference the data source
             'layout': {},
             'paint': {
-                'fill-color': '#0080ff', // blue color fill
+                // 'fill-color': '#0080ff', // blue color fill
+                'fill-color': tablesAndProps[layerId]?.layerColor || "blue",
+
                 'fill-opacity': 0.5
             }
         });
-
-        allPolygons.push({
-            name: uniqueId,
-        })
     }
 
+}
 
+
+//HELPERS 
+function isInt(value) {
+    return !isNaN(value) &&
+        parseInt(Number(value)) == value &&
+        !isNaN(parseInt(value, 10));
 }
