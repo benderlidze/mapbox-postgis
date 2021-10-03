@@ -66,6 +66,7 @@ let selectedPolygonType = ""
 let dataForDropdownLists = ""
 let s;
 const allPolygonLayers = [];
+const allDOTSLayers = [];
 
 const userName = "USER NAME";
 
@@ -80,8 +81,8 @@ mapboxgl.accessToken = 'pk.eyJ1Ijoic2Vyc2Vyc2VyIiwiYSI6ImNrZnBpaWF5azBpMWMyeHBmd
 const map = new mapboxgl.Map({
     container: 'map', // container ID
     style: 'mapbox://styles/mapbox/satellite-v9', // style URL
-    center: [-91.874, 42.76], // starting position [lng, lat]
-    zoom: 2 // starting zoom
+    center:  {lng: -13.651979934790262, lat: 2.842170943040401},
+    zoom: 0 // starting zoom
 });
 
 const draw = new MapboxDraw({
@@ -115,13 +116,35 @@ savePolygon.addEventListener("click", () => {
 })
 
 
-Array.from(document.getElementsByName("load")).forEach(i => {
+Array.from(document.getElementsByName("dots")).forEach(i => {
+    i.addEventListener("change", e => {
+        console.log('e.target.value', e.target.value);
+        //toggleLayer(e.target.value);
+        toggleDOTS(e.target.value);
+    })
+})
 
+Array.from(document.getElementsByName("load")).forEach(i => {
     i.addEventListener("change", e => {
         console.log('e.target.value', e.target.value);
         toggleLayer(e.target.value);
     })
 })
+function toggleDOTS(layer) {
+    if (allDOTSLayers.includes(layer)) {
+        const index = allDOTSLayers.indexOf(layer);
+        if (index !== -1) {
+            allDOTSLayers.splice(index, 1);
+        }
+        //remove loaded polygons
+        map.removeLayer(layer);
+        map.removeSource(layer);
+
+    } else {
+        allDOTSLayers.push(layer)
+        fetchDOTS(layer)
+    }
+}
 
 function toggleLayer(layer) {
 
@@ -426,7 +449,6 @@ async function fetchDataForDropdownLists() {
 }
 
 async function fetchPolygonData(layerId) {
-
     const f = await fetch(serverApiURL + "?getPolygons=true&layerId=" + layerId);
     const j = await f.json()
     console.log('j', j);
@@ -452,12 +474,42 @@ async function fetchPolygonData(layerId) {
             'paint': {
                 // 'fill-color': '#0080ff', // blue color fill
                 'fill-color': tablesAndProps[layerId]?.layerColor || "blue",
-
                 'fill-opacity': 0.5
             }
         });
     }
+}
+async function fetchDOTS(layerId) {
+    const f = await fetch(serverApiURL + "?getDOTS&typeId=" + layerId);
+    const j = await f.json()
+    console.log('j', j);
+    if (j && j.error === "" && j.data.length > 0) {
 
+        const c = j.data.map(i => {
+            console.log('i', i);
+            console.log('i',i.latitude);
+
+            return turf.point([+i.longitude,+i.latitude], i)
+        });
+
+        const collection = turf.featureCollection(c);
+
+        map.addSource(layerId, {
+            'type': 'geojson',
+            'data': collection
+        });
+
+        // Add a new layer to visualize the polygon.
+        map.addLayer({
+            'id': layerId,
+            'type': 'circle',
+            'source': layerId,
+            'paint': {
+                'circle-radius': 5,
+                'circle-color': "red"
+            }
+        });
+    }
 }
 
 

@@ -40,10 +40,70 @@ if (isset($_DATA['polygon'])) {
 		*/
 		$result = pg_query_params($dbconn, 
 			'INSERT INTO poly_an 
-			(userid, poly, poly_an_id, poly_an_name, p_id, working,default_ops, c_cat,c_type, recv_type) 
+			(user_name, poly, poly_an_id, poly_an_name, p_id, working,default_ops, c_cat,c_type, recv_type) 
 			VALUES 
 			($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9, $10)', 
-			array($userName, $polygon,$poly_an_id, )
+			array($userName, $polygon, $poly_an_id, $poly_an_name, $p_id, $working, $default_ops, $c_cat, $c_type, $recv_type)
+		);
+	}
+	
+	if($selectedPolygonType === "poly_b"){
+		
+		$b_id = $_DATA['b_id'];
+		$default_ops = $_DATA['default_ops'];
+		$c_cat = $_DATA['c_cat'];
+		$c_type = $_DATA['c_type'];
+		$recv_type = $_DATA['recv_type'];
+		$b_name = $_DATA['b_name'];
+		$p_name = $_DATA['p_name'];
+		
+		$result = pg_query_params($dbconn, 
+			'INSERT INTO poly_b 
+			(user_name, poly, b_id, default_ops, c_cat,c_type, recv_type, b_name, p_name) 
+			VALUES 
+			($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9)', 
+			array($userName, $polygon,  $b_id, $default_ops, $c_cat, $c_type, $recv_type,$b_name, $p_name)
+		);
+	}
+	
+	if($selectedPolygonType === "poly_p"){
+		
+		$p_id = $_DATA['p_id'];
+		$p_group = $_DATA['p_group'];
+		$p_name = $_DATA['p_name'];
+		
+		$result = pg_query_params($dbconn, 
+			'INSERT INTO poly_p 
+			(user_name, poly, p_id, p_group, p_name) 
+			VALUES 
+			($1,ST_GeomFromGeoJSON($2), $3, $4, $5)', 
+			array($userName, $polygon,  $p_id, $p_group, $p_name)
+		);
+	}
+	
+	if($selectedPolygonType === "poly_s_r"){
+		
+		$poly_s_r_name = $_DATA['poly_s_r_name'];
+		$r_name = $_DATA['r_name'];
+		
+		$result = pg_query_params($dbconn, 
+			'INSERT INTO poly_s_r 
+			(user_name, poly, poly_s_r_name, r_name) 
+			VALUES 
+			($1,ST_GeomFromGeoJSON($2), $3, $4)', 
+			array($userName, $polygon,  $poly_s_r_name, $r_name)
+		);
+	}
+	if($selectedPolygonType === "poly_r"){
+		
+		$poly_r_name = $_DATA['poly_r_name'];
+		
+		$result = pg_query_params($dbconn, 
+			'INSERT INTO poly_r 
+			(user_name, poly, poly_r_name) 
+			VALUES 
+			($1,ST_GeomFromGeoJSON($2), $3)', 
+			array($userName, $polygon,  $poly_r_name)
 		);
 	}
 
@@ -53,11 +113,11 @@ if (isset($_DATA['polygon'])) {
 
 if (isset($_GET['getPolygons'])) {
 
-	//$result = pg_query_params($dbconn, 'SELECT * FROM "public"."poly_an"', array("param"));
+	$table = $_GET['layerId'];
 	$data = [];
 	$error = '';
 	
-	$result = pg_query($dbconn, 'SELECT *,ST_AsGeoJSON(poly) as poly FROM "public"."poly_an"');
+	$result = pg_query($dbconn, 'SELECT *,ST_AsGeoJSON(poly) as poly FROM "public"."'.$table.'"');
 	if (!$result) {
 		$error = "Query Error!";
 	}
@@ -66,10 +126,7 @@ if (isset($_GET['getPolygons'])) {
 			
 		$poly = array(
 		'type'=>'Feature',
-		'properties'=>array(
-				'name'=>$row['poly_an_name'],
-				'id'=>$row['p_id']
-			),
+		'properties'=>$row,
 		'geometry'=>json_decode($row['poly'])
 		); 
 		
@@ -84,6 +141,29 @@ if (isset($_GET['getPolygons'])) {
 	echo json_encode($results);
 	
 }
+
+
+if (isset($_GET['getDOTS'])) {
+	$type = $_GET['typeId'];
+	$data = [];
+	$error = '';
+	
+	$result = pg_query($dbconn, 'SELECT * FROM "public"."ref_dots" where vsl_cat=\''.$type.'\'');
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$poly = $row;
+		$data[] = $poly;
+	}
+	
+	$results = array(
+		'error'=>$error,
+		'data'=>$data
+	);
+	echo json_encode($results);
+}
+
 
 //OPTIONS FOR DROP DOW LIST
 if (isset($_GET['getDataForDropdown'])) {
