@@ -308,14 +308,15 @@ function savePolygonAndData() {
     const polygon = selection.features[0].geometry
     console.log('polygon', polygon);
 
-    const results = [];
+    const results = {};
     const fields = tablesAndProps[selectedPolygonType].fields;
     console.log('fields', fields);
 
     fields.forEach(i => {
         console.log('i', i);
         const node = document.getElementById(i.name)
-        results.push({ name: i.name, value: node.value })
+        //results.push({ name: i.name, value: node.value })
+        results[i.name] = node.value;
     })
 
     console.log('results', results);
@@ -331,12 +332,12 @@ function savePolygonAndData() {
             userName: userName,
             polygon: polygon,
             selectedPolygonType: selectedPolygonType,
-            data: results
+            ...results
         })
     })
         .then(res => res.json())
         .then(res => console.log(res));
-         
+
 }
 
 function updateArea(e) {

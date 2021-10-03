@@ -14,10 +14,38 @@ $_DATA = json_decode($json, true);
 
 if (isset($_DATA['polygon'])) {
 
+	$selectedPolygonType = $_DATA['selectedPolygonType'];
 	$userName = $_DATA['userName'];
 	$polygon = json_encode($_DATA['polygon']);
 
-	$result = pg_query_params($dbconn, 'INSERT INTO poly_an (poly_an_name, poly) VALUES ($1,ST_GeomFromGeoJSON($2))', array($userName, $polygon));
+	if($selectedPolygonType === "poly_an"){
+		
+		$poly_an_id = $_DATA['poly_an_id'];
+		$poly_an_name = $_DATA['poly_an_name'];
+		$p_id = $_DATA['p_id'];
+		$working = $_DATA['working'];
+		$default_ops = $_DATA['default_ops'];
+		$c_cat = $_DATA['c_cat'];
+		$c_type = $_DATA['c_type'];
+		$recv_type = $_DATA['recv_type'];
+		/*
+			poly_an_id	integer	
+			poly_an_name	text	
+			p_id	integer	
+			working	boolean	
+			default_ops	text	
+			c_cat	text	
+			c_type	text	
+			recv_type
+		*/
+		$result = pg_query_params($dbconn, 
+			'INSERT INTO poly_an 
+			(userid, poly, poly_an_id, poly_an_name, p_id, working,default_ops, c_cat,c_type, recv_type) 
+			VALUES 
+			($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9, $10)', 
+			array($userName, $polygon,$poly_an_id, )
+		);
+	}
 
 	$results = array("done" => "ok");
 	echo json_encode($results);
