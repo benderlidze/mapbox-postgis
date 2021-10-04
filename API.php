@@ -164,6 +164,27 @@ if (isset($_GET['getDOTS'])) {
 	echo json_encode($results);
 }
 
+if (isset($_GET['getPOINTS'])) {
+	$type = $_GET['typeId'];
+	$data = [];
+	$error = '';
+	
+	$result = pg_query($dbconn, 'SELECT * FROM "public"."ref_points_'.$type.'" ');
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$poly = $row;
+		$data[] = $poly;
+	}
+	
+	$results = array(
+		'error'=>$error,
+		'data'=>$data
+	);
+	echo json_encode($results);
+}
+
 
 //OPTIONS FOR DROP DOW LIST
 if (isset($_GET['getDataForDropdown'])) {

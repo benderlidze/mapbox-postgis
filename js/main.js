@@ -67,6 +67,7 @@ let dataForDropdownLists = ""
 let s;
 const allPolygonLayers = [];
 const allDOTSLayers = [];
+const allPOINTSLayers = [];
 
 
 const userName = "USER NAME";
@@ -107,9 +108,6 @@ map.on('draw.selectionchange', updateProps);
 
 map.on("load", () => {
 
-
-
-
     map.addLayer({
         id: "raster-satellite-streets",
         source: {
@@ -135,7 +133,7 @@ toggleLayers.addEventListener("click", () => {
         toggleLayers.innerHTML = "streets"
     }
 
-    
+
 })
 
 //save button 
@@ -148,6 +146,14 @@ savePolygon.addEventListener("click", () => {
     }
 })
 
+
+Array.from(document.getElementsByName("points")).forEach(i => {
+    i.addEventListener("change", e => {
+        console.log('e.target.value', e.target.value);
+        //toggleLayer(e.target.value);
+        togglePOINTS(e.target.value);
+    })
+})
 
 Array.from(document.getElementsByName("dots")).forEach(i => {
     i.addEventListener("change", e => {
@@ -163,6 +169,24 @@ Array.from(document.getElementsByName("load")).forEach(i => {
         toggleLayer(e.target.value);
     })
 })
+
+
+function togglePOINTS(layer) {
+    console.log('layer', layer);
+    if (allPOINTSLayers.includes(layer)) {
+        const index = allPOINTSLayers.indexOf(layer);
+        if (index !== -1) {
+            allPOINTSLayers.splice(index, 1);
+        }
+        //remove loaded polygons
+        map.removeLayer(layer);
+        map.removeSource(layer);
+
+    } else {
+        allPOINTSLayers.push(layer)
+        fetchPOINTS(layer)
+    }
+}
 function toggleDOTS(layer) {
     if (allDOTSLayers.includes(layer)) {
         const index = allDOTSLayers.indexOf(layer);
@@ -508,6 +532,39 @@ async function fetchPolygonData(layerId) {
                 // 'fill-color': '#0080ff', // blue color fill
                 'fill-color': tablesAndProps[layerId]?.layerColor || "blue",
                 'fill-opacity': 0.5
+            }
+        });
+    }
+}
+async function fetchPOINTS(layerId) {
+
+    const f = await fetch(serverApiURL + "?getPOINTS&typeId=" + layerId.toLowerCase());
+    const j = await f.json()
+    console.log('j', j);
+    if (j && j.error === "" && j.data.length > 0) {
+
+        const c = j.data.map(i => {
+            console.log('i', i);
+            console.log('i', i.latitude);
+
+            return turf.point([+i.longitude, +i.latitude], i)
+        });
+
+        const collection = turf.featureCollection(c);
+
+        map.addSource(layerId, {
+            'type': 'geojson',
+            'data': collection
+        });
+
+        // Add a new layer to visualize the polygon.
+        map.addLayer({
+            'id': layerId,
+            'type': 'circle',
+            'source': layerId,
+            'paint': {
+                'circle-radius': 5,
+                'circle-color': "red"
             }
         });
     }
