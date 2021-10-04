@@ -10,6 +10,7 @@ const tablesAndProps = { //all fields that should be send to DB
             { name: 'c_cat', type: "dropdown" },
             { name: 'c_type', type: "dropdown" },
             { name: 'recv_type', type: "dropdown" },
+            { name: 'p_name', type: "input" },
             // { name: 'poly_array', type: "input" },
             // { name: 'userid', type: "input" },
         ],
@@ -62,6 +63,9 @@ const tablesAndProps = { //all fields that should be send to DB
     },
 }
 
+var colorArray = ['red', 'blue', 'green', 'orange', 'yellow',
+    'purple', '#3366E6', '#999966', '#99FF99', '#B34D4D',];
+
 let selectedPolygonType = ""
 let dataForDropdownLists = ""
 let s;
@@ -99,12 +103,7 @@ const draw = new MapboxDraw({
     // The user does not have to click the polygon control button first.
     //defaultMode: 'draw_polygon'
 });
-map.addControl(draw, 'top-left');
 
-map.on('draw.create', updateArea);
-map.on('draw.delete', updateArea);
-map.on('draw.update', updateArea);
-map.on('draw.selectionchange', updateProps);
 
 map.on("load", () => {
 
@@ -117,7 +116,14 @@ map.on("load", () => {
         },
         type: "raster",
         layout: { "visibility": "visible" }
-    });
+    },
+    );
+
+    map.addControl(draw, 'top-left');
+    map.on('draw.create', updateArea);
+    map.on('draw.delete', updateArea);
+    map.on('draw.update', updateArea);
+    map.on('draw.selectionchange', updateProps);
 
 })
 
@@ -173,18 +179,21 @@ Array.from(document.getElementsByName("load")).forEach(i => {
 
 function togglePOINTS(layer) {
     console.log('layer', layer);
-    if (allPOINTSLayers.includes(layer)) {
-        const index = allPOINTSLayers.indexOf(layer);
+
+    const layerWithPrefix = 'points_' + layer;
+
+    if (allPOINTSLayers.includes(layerWithPrefix)) {
+        const index = allPOINTSLayers.indexOf(layerWithPrefix);
         if (index !== -1) {
             allPOINTSLayers.splice(index, 1);
         }
         //remove loaded polygons
-        map.removeLayer(layer);
-        map.removeSource(layer);
+        map.removeLayer(layerWithPrefix);
+        map.removeSource(layerWithPrefix);
 
     } else {
-        allPOINTSLayers.push(layer)
-        fetchPOINTS(layer)
+        allPOINTSLayers.push(layerWithPrefix)
+        fetchPOINTS(layer, 'points_')
     }
 }
 function toggleDOTS(layer) {
@@ -536,7 +545,7 @@ async function fetchPolygonData(layerId) {
         });
     }
 }
-async function fetchPOINTS(layerId) {
+async function fetchPOINTS(layerId, prefix) {
 
     const f = await fetch(serverApiURL + "?getPOINTS&typeId=" + layerId.toLowerCase());
     const j = await f.json()
@@ -552,21 +561,39 @@ async function fetchPOINTS(layerId) {
 
         const collection = turf.featureCollection(c);
 
-        map.addSource(layerId, {
+        map.addSource(prefix + layerId, {
             'type': 'geojson',
             'data': collection
         });
 
-        // Add a new layer to visualize the polygon.
         map.addLayer({
-            'id': layerId,
-            'type': 'circle',
-            'source': layerId,
+            'id': prefix + layerId,
+            'type': 'symbol',
+            'source': prefix + layerId,
+            'layout': {
+                'text-field': '■',
+                'text-size': 25,
+                'icon-allow-overlap': true,
+                'text-allow-overlap': true,
+            },
             'paint': {
-                'circle-radius': 5,
-                'circle-color': "red"
+                'text-color': colorArray[allPOINTSLayers.length],
             }
         });
+
+
+        // Add a new layer to visualize the polygon.
+        /*
+        map.addLayer({
+            'id': prefix + layerId,
+            'type': 'circle',
+            'source': prefix + layerId,
+            'paint': {
+                'circle-radius': 5,
+                'circle-color': "blue"
+            }
+        });
+        */
     }
 }
 async function fetchDOTS(layerId) {
@@ -596,7 +623,7 @@ async function fetchDOTS(layerId) {
             'source': layerId,
             'paint': {
                 'circle-radius': 5,
-                'circle-color': "red"
+                'circle-color': colorArray[allDOTSLayers.length]
             }
         });
     }
