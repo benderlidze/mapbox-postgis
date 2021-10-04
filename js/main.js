@@ -68,9 +68,11 @@ let s;
 const allPolygonLayers = [];
 const allDOTSLayers = [];
 
+
 const userName = "USER NAME";
 
 //const info = document.getElementById("info");
+const toggleLayers = document.getElementById("toggleLayers");
 const loadExistingPolygons = document.getElementById("loadExistingPolygons");
 const savePolygon = document.getElementById("savePolygon")
 const allPolygons = [];
@@ -80,8 +82,8 @@ const serverApiURL = 'http://176.223.134.242/~test/API.php';
 mapboxgl.accessToken = 'pk.eyJ1Ijoic2Vyc2Vyc2VyIiwiYSI6ImNrZnBpaWF5azBpMWMyeHBmdzJpdno1NzgifQ.4vBDF2DNuk-beXljllf3Yg';
 const map = new mapboxgl.Map({
     container: 'map', // container ID
-    style: 'mapbox://styles/mapbox/satellite-v9', // style URL
-    center:  {lng: -13.651979934790262, lat: 2.842170943040401},
+    style: 'mapbox://styles/mapbox/streets-v11', // style URL
+    center: { lng: -13.651979934790262, lat: 2.842170943040401 },
     zoom: 0 // starting zoom
 });
 
@@ -103,7 +105,38 @@ map.on('draw.delete', updateArea);
 map.on('draw.update', updateArea);
 map.on('draw.selectionchange', updateProps);
 
+map.on("load", () => {
+
+
+
+
+    map.addLayer({
+        id: "raster-satellite-streets",
+        source: {
+            "type": "raster",
+            "tiles": ["https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZGV2cGFya2FzaHN1bWl0IiwiYSI6ImNqc242dmNvcTAwdno0YXFuMzQ4MGlzbWkifQ.nhpUN4VR3Lvd7_gjtsIesg"],
+            "tileSize": 512
+        },
+        type: "raster",
+        layout: { "visibility": "visible" }
+    });
+
+})
+
 fetchDataForDropdownLists();
+
+toggleLayers.addEventListener("click", () => {
+
+    if (map.getLayer('raster-satellite-streets').visibility === 'visible') {
+        map.setLayoutProperty('raster-satellite-streets', 'visibility', 'none')
+        toggleLayers.innerHTML = "satellite"
+    } else {
+        map.setLayoutProperty('raster-satellite-streets', 'visibility', 'visible')
+        toggleLayers.innerHTML = "streets"
+    }
+
+    
+})
 
 //save button 
 savePolygon.addEventListener("click", () => {
@@ -487,9 +520,9 @@ async function fetchDOTS(layerId) {
 
         const c = j.data.map(i => {
             console.log('i', i);
-            console.log('i',i.latitude);
+            console.log('i', i.latitude);
 
-            return turf.point([+i.longitude,+i.latitude], i)
+            return turf.point([+i.longitude, +i.latitude], i)
         });
 
         const collection = turf.featureCollection(c);
