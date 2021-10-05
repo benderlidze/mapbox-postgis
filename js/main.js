@@ -4,7 +4,7 @@ const tablesAndProps = { //all fields that should be send to DB
         fields: [
             { name: 'poly_an_id', type: "input", checkType: 'INTEGER' },
             { name: 'poly_an_name', type: "input" },
-            { name: 'p_id', type: "input", checkType: 'INTEGER' },
+            { name: 'p_id', type: "input", checkType: 'INTEGER', callback: `getPName(this.value)` },
             { name: 'working', type: "dropdown" },
             { name: 'default_ops', type: "dropdown" },
             { name: 'c_cat', type: "dropdown" },
@@ -18,7 +18,7 @@ const tablesAndProps = { //all fields that should be send to DB
     },
     'poly_b': {
         fields: [
-            { name: 'b_id', type: "input", checkType: 'INTEGER' },
+            { name: 'b_id', type: "input", checkType: 'INTEGER', callback: `getBName(this.value)` },
             { name: 'default_ops', type: "dropdown" },
             { name: 'c_cat', type: "dropdown" },
             { name: 'c_type', type: "dropdown" },
@@ -34,7 +34,7 @@ const tablesAndProps = { //all fields that should be send to DB
     'poly_p': {
         fields: [
 
-            { name: 'p_id', type: "input", checkType: 'INTEGER' },
+            { name: 'p_id', type: "input", checkType: 'INTEGER', callback: `getPName(this.value)` },
             { name: 'p_group', type: "input" },
             { name: 'p_name', type: "input" },
             // { name: 'poly_array', type: "input" },
@@ -275,11 +275,17 @@ function updateProps(geometry) {
     }
 }
 
-function buildInput(id, displayName, currentValue) {
+function buildInput(id, displayName, currentValue, callback) {
+
+    let f = '';
+    if (callback) {
+        f = `oninput="${callback}"`;
+    }
+
     return ` <div class="row mb-2">
         <label class="col-sm-3 col-form-label col-form-label-sm" style="white-space: nowrap;">${displayName}</label>
         <div class="col-sm-8">
-        <input type="email" class="form-control form-control-sm" id="${id}" value="${currentValue}">
+        <input type="email" class="form-control form-control-sm" id="${id}" value="${currentValue}" ${f}>
         </div>
         </div>
     `
@@ -326,7 +332,7 @@ function buildPropsByPolygonType(table_id) {
 
         let res;
         if (i.type === "input") {
-            res = buildInput(i.name, i.name, "")
+            res = buildInput(i.name, i.name, "", i.callback)
         }
 
         if (i.type === "dropdown") {
@@ -424,6 +430,8 @@ document.addEventListener("click", e => {
 })
 
 
+
+
 function savePolygonAndData() {
 
     const error = [];
@@ -505,6 +513,25 @@ function savePolygonData(polygonData) {
 
 }
 
+async function getBName(b_id) {
+    b_id = Number(b_id);
+    const f = await fetch(serverApiURL + "?getBName=" + b_id);
+    const j = await f.json()
+    if (j && j.error === "") {
+        console.log('j', j);
+        if (j.data.p_name && j.data.p_name !== "") document.getElementById("p_name").value = j.data.p_name;
+        if (j.data.b_name && j.data.b_name !== "") document.getElementById("b_name").value = j.data.b_name;
+    }
+}
+async function getPName(id) {
+    id = Number(id);
+    const f = await fetch(serverApiURL + "?getPName=" + id);
+    const j = await f.json()
+    if (j && j.error === "") {
+        console.log('j', j);
+        if (j.data.p_name && j.data.p_name !== "") document.getElementById("p_name").value = j.data.p_name;
+    }
+}
 
 async function fetchDataForDropdownLists() {
     const f = await fetch(serverApiURL + "?getDataForDropdown=true");

@@ -111,6 +111,48 @@ if (isset($_DATA['polygon'])) {
 	echo json_encode($results);
 }
 
+if (isset($_GET['getBName'])) {
+
+	$b_id = $_GET['getBName'];
+	$data = '';
+	$error = '';
+	$result = pg_query($dbconn, 'SELECT b_name, p_name FROM "public"."ref_points_b" 
+								LEFT JOIN "public"."ref_points_p" ON ref_points_p.p_id = ref_points_b.p_id
+								where b_id = '.$b_id.'');
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$data = $row;
+	}
+	$results = array(
+		'error'=>$error,
+		'data'=>$data
+	);
+	echo json_encode($results);
+}
+
+if (isset($_GET['getPName'])) {
+
+	$p_id = $_GET['getPName'];
+	$data = '';
+	$error = '';
+	$result = pg_query($dbconn, 'SELECT p_name FROM "public"."ref_points_p" 						
+								where p_id = '.$p_id.'');
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$data = $row;
+	}
+	$results = array(
+		'error'=>$error,
+		'data'=>$data
+	);
+	echo json_encode($results);
+}
+
+
 if (isset($_GET['getPolygons'])) {
 
 	$table = $_GET['layerId'];
