@@ -50,19 +50,25 @@ p {
     width: 100%;
     margin:3px;
 }
-
+/*
 .mapboxgl-popup-content {
     width: 400px;
     padding: 10px 10px 15px;
 }
+*/
 
 #toggleLayers{
     position: absolute;
-    top:20px;
-    right:20px;
+    bottom:40px;
+    left:20px;
     padding:10px;
     border-radius: 5px;
     z-index: 1000;
     background-color: white;
     cursor: pointer;
+    border: 1px solid gray;
+}
+
+#polygonInfo{
+    padding: 10px;
 }

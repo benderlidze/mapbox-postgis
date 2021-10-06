@@ -10,8 +10,8 @@ const tablesAndProps = { //all fields that should be send to DB
             { name: 'c_cat', type: "dropdown" },
             { name: 'c_type', type: "dropdown" },
             { name: 'recv_type', type: "dropdown" },
-            { name: 'p_name', type: "input" },
-            // { name: 'poly_array', type: "input" },
+            { name: 'p_name', type: "input", disabled: true },
+            { name: 'table_id', type: "input", disabled: true },
             // { name: 'userid', type: "input" },
         ],
         layerColor: "orange"
@@ -23,8 +23,9 @@ const tablesAndProps = { //all fields that should be send to DB
             { name: 'c_cat', type: "dropdown" },
             { name: 'c_type', type: "dropdown" },
             { name: 'recv_type', type: "dropdown" },
-            { name: 'b_name', type: "input" },
-            { name: 'p_name', type: "input" },
+            { name: 'b_name', type: "input", disabled: true },
+            { name: 'p_name', type: "input", disabled: true },
+            { name: 'table_id', type: "input", disabled: true }
             // { name: 'poly_array', type: "input" },
             // { name: 'userid', type: "input" },
 
@@ -36,7 +37,8 @@ const tablesAndProps = { //all fields that should be send to DB
 
             { name: 'p_id', type: "input", checkType: 'INTEGER', callback: `getPName(this.value)` },
             { name: 'p_group', type: "input" },
-            { name: 'p_name', type: "input" },
+            { name: 'p_name', type: "input", disabled: true },
+            { name: 'table_id', type: "input", disabled: true }
             // { name: 'poly_array', type: "input" },
             // { name: 'userid', type: "input" },
         ],
@@ -47,6 +49,7 @@ const tablesAndProps = { //all fields that should be send to DB
 
             { name: 'poly_s_r_name', type: "input" },
             { name: 'r_name', type: "input" },
+            { name: 'table_id', type: "input" }
             // { name: 'poly_array', type: "input" },
             // { name: 'userid', type: "input" },
         ],
@@ -56,6 +59,7 @@ const tablesAndProps = { //all fields that should be send to DB
         fields: [
             //{ name: 'poly_r_id', type: "hidden", checkType: 'INTEGER' },
             { name: 'poly_r_name', type: "input" },
+            { name: 'table_id', type: "input" }
             // { name: 'poly_array', type: "hidden" },
             // { name: 'userid', type: "hidden" },
         ],
@@ -65,7 +69,7 @@ const tablesAndProps = { //all fields that should be send to DB
 
 var colorArray = ['red', 'blue', 'green', 'orange', 'yellow',
     'purple', '#3366E6', '#999966', '#99FF99', '#B34D4D',];
-
+let popup;
 let selectedPolygonType = ""
 let dataForDropdownLists = ""
 let s;
@@ -73,10 +77,11 @@ const allPolygonLayers = [];
 const allDOTSLayers = [];
 const allPOINTSLayers = [];
 
-
+let currentPolygonUniqueID;
 const userName = "USER NAME";
 
 //const info = document.getElementById("info");
+const polygonInfo = document.getElementById("polygonInfo");
 const toggleLayers = document.getElementById("toggleLayers");
 const loadExistingPolygons = document.getElementById("loadExistingPolygons");
 const savePolygon = document.getElementById("savePolygon")
@@ -143,6 +148,7 @@ toggleLayers.addEventListener("click", () => {
 })
 
 //save button 
+/*
 savePolygon.addEventListener("click", () => {
     const data = draw.getSelected();
     if (data.features.length > 0) {//we have at least one selected polygon
@@ -151,6 +157,7 @@ savePolygon.addEventListener("click", () => {
         draw.changeMode("simple_select")
     }
 })
+*/
 
 
 Array.from(document.getElementsByName("points")).forEach(i => {
@@ -212,24 +219,22 @@ function toggleDOTS(layer) {
     }
 }
 
-function toggleLayer(layer) {
+function toggleLayer(layerId) {
 
-    if (allPolygonLayers.includes(layer)) {
-        const index = allPolygonLayers.indexOf(layer);
+    if (allPolygonLayers.includes(layerId)) {
+        const index = allPolygonLayers.indexOf(layerId);
         if (index !== -1) {
             allPolygonLayers.splice(index, 1);
         }
         //remove loaded polygons
-        map.removeLayer(layer);
-        map.removeSource(layer);
+        if (map.getLayer(layerId)) map.removeLayer(layerId);
+        if (map.getSource(layerId)) map.removeSource(layerId);
+        map.off("click", layerId, editPolygon)
 
     } else {
-        allPolygonLayers.push(layer)
-        fetchPolygonData(layer)
+        allPolygonLayers.push(layerId)
+        fetchPolygonData(layerId)
     }
-
-
-
 }
 /*
 loadExistingPolygons.addEventListener("change", () => {
@@ -249,14 +254,13 @@ loadExistingPolygons.addEventListener("change", () => {
     }
 })
 */
-let popup;
-function updateProps(geometry) {
-    console.log('props', geometry);
-    if (popup) popup.remove();
 
+function updateProps(geometry) {
+    console.log('updateProps!!!!!!!!!!!', geometry);
+    if (popup) popup.remove();
     if (geometry.features.length > 0) {
         //show info block with params
-
+        /*
         const center = turf.centerOfMass(geometry.features[0]);
         console.log('center', center);
 
@@ -271,72 +275,112 @@ function updateProps(geometry) {
                 .setHTML(buildPropsByPolygonType())
                 .addTo(map);
         }
+        */
+
+        buildPropsByPolygonType(geometry.features[0].properties);
 
     }
 }
 
-function buildInput(id, displayName, currentValue, callback) {
+function buildInput(data, currentValue, callback) {
+
+    const displayName = data.name;
+    const id = data.name
+
+    let disabled = '';
+    if (data.disabled) {
+        disabled = "disabled"
+    }
 
     let f = '';
     if (callback) {
         f = `oninput="${callback}"`;
     }
 
+    let value = '';
+    if (currentValue && currentValue[data.name]) {
+        value = currentValue[data.name];
+    }
+
     return ` <div class="row mb-2">
         <label class="col-sm-3 col-form-label col-form-label-sm" style="white-space: nowrap;">${displayName}</label>
         <div class="col-sm-8">
-        <input type="email" class="form-control form-control-sm" id="${id}" value="${currentValue}" ${f}>
+        <input type="email" class="form-control form-control-sm" ${disabled} id="${id}" value="${value}" ${f}>
         </div>
         </div>
     `
 }
-function buildDropDown(id, displayName, dataArray, callback) {
+
+function buildDropDown(data, dataArray, currentValue, callback) {
 
     let disabled = ""
     if (dataArray.length <= 0) disabled = "disabled";
+
+
+    let value = '';
+    if (currentValue && currentValue[data.name]) {
+        value = currentValue[data.name];
+    }
 
     let onchange = "";
     if (callback) {
         onchange = `onchange="${callback}"`;
     }
-    const list = dataArray.map(i => `<option value="${i.id}">${i.val}</option>`)
+
+    const list = dataArray.map(i => {
+        let selected = '';
+        if (i.id === value) {
+            selected = 'selected';
+        }
+        return `<option value="${i.id}" ${selected}>${i.val}</option>`
+    }).join("")
+
     return `
     <div class="row mb-2">
-        <label class="col-sm-3 col-form-label col-form-label-sm">${displayName}</label>
+        <label class="col-sm-3 col-form-label col-form-label-sm">${data.name}</label>
         <div class="col-sm-8">
-            <select class="form-select form-select-sm" id="${id}" ${disabled} ${onchange}>${list}</select>
+            <select class="form-select form-select-sm" id="${data.name}" ${disabled} ${onchange}>${list}</select>
         </div>
     </div>
     `
+
 }
 
-function updateVal() {
+function updateVal(inputData) {
 
-    console.log('this', this);
     document.getElementById("c_type").removeAttribute("disabled");
     document.getElementById("c_type").innerHTML = dataForDropdownLists.data.cgo
         .filter(i => i.cgo_value === document.getElementById("c_cat").value)
-        .map(i => `<option value="${i.cgo_id}">${i.cgo_type}</option>`)
+        .map(i => {
+            let selected = '';
+            if (inputData && i.cgo_id === inputData['c_type']) {
+                selected = 'selected';
+            }
+            return `<option value="${i.cgo_id}" selected>${i.cgo_type}</option>`
+        })
 
 }
 
-function buildPropsByPolygonType(table_id) {
 
-    if (!table_id) table_id = "";
+function buildPropsByPolygonType(inputData) {
+
+    console.log('INPUT ADTA', inputData);
+    // if (!table_id) table_id = "";
 
     if (!selectedPolygonType) { console.warn("Type of the polygon is not defined"); return; }
     if (!tablesAndProps[selectedPolygonType]) { console.warn("No props for this type of polygon"); return; }
+
+
 
 
     const fields = tablesAndProps[selectedPolygonType].fields.map(i => {
 
         let res;
         if (i.type === "input") {
-            res = buildInput(i.name, i.name, "", i.callback)
+            res = buildInput(i, inputData, i.callback)
         }
 
         if (i.type === "dropdown") {
-
 
             if (i.name === 'c_cat') {
                 data = [...new Set(dataForDropdownLists.data.cgo.map(i => i.cgo_value))].map(i => {
@@ -360,52 +404,55 @@ function buildPropsByPolygonType(table_id) {
             }
             if (i.name === 'working') {
                 data = [
-                    { id: 'true', val: 'Yes' },
-                    { id: 'false', val: 'No' },
+                    { id: 'Yes', val: 'Yes' },
+                    { id: 'No', val: 'No' },
                 ]
             }
 
-            console.log('i.name', i.name);
-
             if (i.name === 'c_cat') {
-                res = buildDropDown(i.name, i.name, data, `updateVal()`)
+                res = buildDropDown(i, data, inputData, `updateVal()`)
+                setTimeout(() => updateVal(inputData), 100);//to update the c_type dropdown 
+
             } else if (i.name === 'c_type') {
-                res = buildDropDown(i.name, i.name, [])
+                res = buildDropDown(i, [], inputData)
             } else {
-                res = buildDropDown(i.name, i.name, data)
+                res = buildDropDown(i, data, inputData)
             }
 
         }
 
         if (i.type === "hidden") {
-            res = buildInput(i.name, i.name, "")
+            res = buildInput(i, "")
         }
 
 
         return res
     })
 
-    /*
-    ${buildInput('poly_an_name', 'poly an name', "")}
-    ${buildInput('P ID', 'p_id', "")}
-    ${buildDropDown('working', ['test a ', 'test b '])}
-    */
-
     const type_an = `
     <h3>${selectedPolygonType}</h3>
 
-    <div class="dataBlock" table_id="${table_id}" style="display:flex;flex-direction: column;">
+    <div class="dataBlock"  style="display:flex;flex-direction: column;">
 
         ${fields.join("")}    
 
         <div class="col-auto">
             <button class="saveButton btn btn-primary savePolygonData">Save</button>
-            <button class="remove btn btn-primary">Remove</button>
+            <button class="remove btn btn-primary removePolygonData">Remove</button>
         </div>
     </div>`
 
     const text = type_an;
-    return text;
+
+
+    const uniqueId = selectedPolygonType + "_" + inputData.table_id
+    if (currentPolygonUniqueID !== uniqueId) {
+        currentPolygonUniqueID = uniqueId
+        polygonInfo.innerHTML = text;
+    }
+
+    
+    //return text;
 }
 
 
@@ -425,18 +472,73 @@ document.addEventListener("click", e => {
     if (e.target.classList.contains("savePolygonData")) {
         console.log('savePolygonData');
         savePolygonAndData();
+        clearCurrentPolygonUniqueID()
+    }
+    if (e.target.classList.contains("removePolygonData")) {
+        console.log('removePolygonData');
+        removePolygonAndData();
     }
 
 })
 
 
+function clearCurrentPolygonUniqueID(){ //clear currentPolygonUniqueID after saving the data 
+    currentPolygonUniqueID = '';
+}
+
+function removePolygonAndData() {
+
+
+    var r = confirm("Do you want to remove the polygon?");
+    if (!r) { return; }
+
+
+    const error = [];
+    //const selection = draw.getSelected();
+    const selection = draw.getAll();
+    if (selection.features.length === 0) { console.warn('Nothing to save! Select the polygon.'); return; }
+    if (!selection.features[0].properties.table_id || !Number.isInteger(+selection.features[0].properties.table_id)) { console.warn('No table_id value.'); return; }
+
+    console.log('selection', selection);
+
+    //update_by_table_id
+    const body = JSON.stringify({
+        userName: userName,
+        table_name: selectedPolygonType,
+        removePolygonByTableId: selection.features[0].properties.table_id
+    })
+
+    //SEND DATA TO SERVER
+    fetch(serverApiURL, {
+        method: 'post',
+        headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json'
+        },
+        body: body
+    })
+        .then(res => res.json())
+        .then(res => {
+            if (res.done === "ok") {
+                //popup.remove()
+                console.log('--------------UPDATE EDITIED LAYER------------',);
+                draw.changeMode("simple_select")
+                draw.deleteAll()
+                map.removeLayer(selectedPolygonType)
+                map.removeSource(selectedPolygonType)
+                fetchPolygonData(selectedPolygonType)
+                polygonInfo.innerHTML = '';
+            }
+        });
+}
 
 
 function savePolygonAndData() {
 
     const error = [];
 
-    const selection = draw.getSelected();
+    //const selection = draw.getSelected();
+    const selection = draw.getAll();
     if (selection.features.length === 0) { console.warn('Nothing to save! Select the polygon.'); return; }
 
     const polygon = selection.features[0].geometry
@@ -464,6 +566,15 @@ function savePolygonAndData() {
         return;
     }
 
+    //update_by_table_id
+    const body = JSON.stringify({
+        userName: userName,
+        polygon: polygon,
+        selectedPolygonType: selectedPolygonType,
+        ...results
+    })
+
+
     //SEND DATA TO SERVER
     fetch(serverApiURL, {
         method: 'post',
@@ -471,20 +582,23 @@ function savePolygonAndData() {
             'Accept': 'application/json, text/plain, */*',
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            userName: userName,
-            polygon: polygon,
-            selectedPolygonType: selectedPolygonType,
-            ...results
-        })
+        body: body
     })
         .then(res => res.json())
         .then(res => {
             if (res.done === "ok") {
-                popup.remove()
+                //popup.remove()
+
+                //reload/update edited layer
+                console.log('--------------UPDATE EDITIED LAYER------------',);
+                draw.changeMode("simple_select")
+                // draw.deleteAll()
+                map.removeLayer(selectedPolygonType)
+                map.removeSource(selectedPolygonType)
+                fetchPolygonData(selectedPolygonType)
+                polygonInfo.innerHTML = '';
             }
         });
-
 }
 
 function updateArea(e) {
@@ -515,22 +629,32 @@ function savePolygonData(polygonData) {
 
 async function getBName(b_id) {
     b_id = Number(b_id);
+    let p_name = '';
+    let b_name = '';
+
     const f = await fetch(serverApiURL + "?getBName=" + b_id);
     const j = await f.json()
     if (j && j.error === "") {
         console.log('j', j);
-        if (j.data.p_name && j.data.p_name !== "") document.getElementById("p_name").value = j.data.p_name;
-        if (j.data.b_name && j.data.b_name !== "") document.getElementById("b_name").value = j.data.b_name;
+        if (j.data.p_name && j.data.p_name !== "") p_name = j.data.p_name;
+        if (j.data.b_name && j.data.b_name !== "") b_name = j.data.b_name;
     }
+
+    document.getElementById("p_name").value = p_name;
+    document.getElementById("b_name").value = b_name;
 }
 async function getPName(id) {
     id = Number(id);
+    let p_name = '';
+
     const f = await fetch(serverApiURL + "?getPName=" + id);
     const j = await f.json()
     if (j && j.error === "") {
         console.log('j', j);
-        if (j.data.p_name && j.data.p_name !== "") document.getElementById("p_name").value = j.data.p_name;
+        if (j.data.p_name && j.data.p_name !== "") p_name = j.data.p_name;
     }
+
+    document.getElementById("p_name").value = p_name;
 }
 
 async function fetchDataForDropdownLists() {
@@ -541,17 +665,50 @@ async function fetchDataForDropdownLists() {
     }
 }
 
+let currentEditPolygon = "";
+
+function editPolygon(e) {
+
+    const polygon = e.features[0]
+    console.log('---------------------------------',);
+
+    console.log('polygon', polygon);
+    console.log('PROPS', polygon.properties);
+    console.log('SOURCE', polygon.source);
+    console.log('---------------------------------',);
+
+
+    if (!currentEditPolygon || currentEditPolygon !== polygon.source + "_" + polygon.properties.table_id) {
+        currentEditPolygon = polygon.source + "_" + polygon.properties.table_id;
+        draw.deleteAll()
+        draw.add(polygon)
+    }
+
+    console.log('currentEditPolygon', currentEditPolygon === polygon.source + "_" + polygon.properties.table_id);
+
+    /*
+    console.log('currentEditPolygon===========================>', currentEditPolygon);
+    const polygonType = e.features[0].source;//get the polygon type from DATA 
+    if (!polygonType || !Object.keys(tablesAndProps).includes(polygonType)) { console.warn("Polygon type is not defined or is not supported"); return; }
+    console.log('polygonType', polygonType)
+    console.log('PROPS', tablesAndProps[polygonType])
+    selectedPolygonType = polygonType;
+    */
+
+    selectedPolygonType = polygon.source
+    buildPropsByPolygonType(polygon.properties);
+}
+
 async function fetchPolygonData(layerId) {
     const f = await fetch(serverApiURL + "?getPolygons=true&layerId=" + layerId);
     const j = await f.json()
     console.log('j', j);
     if (j && j.error === "" && j.data.length > 0) {
 
-        j.data.forEach(i => {
-            console.log('i', i);
-        });
-
         const collection = turf.featureCollection(j.data);
+
+        if (map.getLayer(layerId)) map.removeLayer(layerId);
+        if (map.getSource(layerId)) map.removeSource(layerId);
 
         map.addSource(layerId, {
             'type': 'geojson',
@@ -570,6 +727,8 @@ async function fetchPolygonData(layerId) {
                 'fill-opacity': 0.5
             }
         });
+
+        map.on("click", layerId, editPolygon)
     }
 }
 async function fetchPOINTS(layerId, prefix) {
@@ -609,6 +768,9 @@ async function fetchPOINTS(layerId, prefix) {
         });
 
 
+        map.on("click", prefix + layerId, showPopup)
+        map.on('mouseenter', prefix + layerId, mouseEnter);
+        map.on('mouseleave', prefix + layerId, mouseLeave);
         // Add a new layer to visualize the polygon.
         /*
         map.addLayer({
@@ -653,8 +815,46 @@ async function fetchDOTS(layerId) {
                 'circle-color': colorArray[allDOTSLayers.length]
             }
         });
+
+        map.on("click", layerId, showPopup)
+        map.on('mouseenter', layerId, mouseEnter);
+        map.on('mouseleave', layerId, mouseLeave);
     }
 }
+
+// Create a popup, but don't add it to the map yet.
+const popupDOTS = new mapboxgl.Popup({
+    closeButton: false,
+    closeOnClick: false
+});
+
+function showPopup(e) {
+
+}
+
+function mouseEnter(e) {
+    const coordinates = e.features[0].geometry.coordinates.slice();
+    const props = e.features[0].properties;
+
+    console.log('description', e.features[0].properties);
+
+    const descr = Object.entries(props).map(i => {
+        return `
+            <div>
+                <b>${i[0]}</b>: ${i[1]}
+            </div>
+        `
+    }).join("")
+
+    map.getCanvas().style.cursor = 'pointer';
+    popupDOTS.setLngLat(coordinates).setHTML(descr).addTo(map);
+}
+
+function mouseLeave(e) {
+    map.getCanvas().style.cursor = '';
+    popupDOTS.remove();
+}
+
 
 
 //HELPERS 

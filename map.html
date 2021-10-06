@@ -19,13 +19,21 @@
 
 <body>
 
-    <div id="toggleLayers">Street</div>
+
 
     <div id="info"></div>
     <div class="h-100  m-0 p-0">
         <div class="row h-100 m-0 p-0">
             <div class="col-md-3 m-0 p-0">
                 <div id="panel" class="d-flex flex-column">
+                    <div class="tab">
+                        <div>
+                            <div>Login as User name </div>
+                            <button type="button" class="btn btn-secondary btn-sm">Logout</button>
+                            <!-- <button type="button" id="savePolygon" class="btn btn-secondary btn-sm">Save</button> -->
+                        </div>
+                    </div>
+
                     <div id="points" class="tab">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="geoPoint">
@@ -130,7 +138,7 @@
                             </div>
                         </div>
                     </div>
-                    <div id="points" class="tab">
+                    <div class="tab">
                         <label class="form-check-label" for="flexSwitchCheckDefault">Type of polygon to draw</label>
 
                         <div class="d-flex ">
@@ -168,17 +176,19 @@
                             </div>
                         </div>
                     </div>
-                    <div id="points" class="tab">
-                        <div>
-                            <div>Login as User name </div>
-                            <button type="button" class="btn btn-secondary btn-sm">Logout</button>
-                            <button type="button" id="savePolygon" class="btn btn-secondary btn-sm">Save</button>
-                        </div>
+
+
+                    <div id="polygonInfo">
+
                     </div>
                 </div>
             </div>
             <div class="col-md-9 m-0 p-0">
                 <div id="map"></div>
+                <div style="position: relative;">
+                    <div id="toggleLayers">Street</div>
+                </div>
+
             </div>
         </div>
     </div>
