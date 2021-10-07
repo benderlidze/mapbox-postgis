@@ -50,3 +50,19 @@ INSERT INTO "public"."ref_dots" (vsl_id,	vsl_name,	vsl_type,	latitude,	longitude
 INSERT INTO "public"."ref_dots" (vsl_id,	vsl_name,	vsl_type,	latitude,	longitude,	vsl_cat, status) VALUES ('2354',	'keke',	'fis',	1.258498,	104.111705,	's',	'fresh');
 INSERT INTO "public"."ref_dots" (vsl_id,	vsl_name,	vsl_type,	latitude,	longitude,	vsl_cat, status) VALUES ('2355',	'tuohai',	'oct',	4.157267,	100.603983,	'h',	'rotten');
 INSERT INTO "public"."ref_dots" (vsl_id,	vsl_name,	vsl_type,	latitude,	longitude,	vsl_cat, status) VALUES ('2356',	'ffa',	'oct',	10.567783,	107.019583,	'h',	'yummy');
+
+
+
+
+
+INSERT INTO "public"."ref_points_b" ("b_id","t_id","p_id","b_name","b_operator","b_status","facility_type","latitude","longitude")	VALUES ('568',	'367',	'928',	'KJ1'	,'kedah'	,'Active'	,'dry'	,3.0505833	,101.3600333);
+INSERT INTO "public"."ref_points_b" ("b_id","t_id","p_id","b_name","b_operator","b_status","facility_type","latitude","longitude")	VALUES ('130',	'367',	'491',	'No 08'	,'north'	,'Active'	,'dry'	,3.0159	,101.3568);
+INSERT INTO "public"."ref_points_b" ("b_id","t_id","p_id","b_name","b_operator","b_status","facility_type","latitude","longitude")	VALUES ('131',	'367',	'491',	'No 09'	,'north'	,'Active'	,'dry'	,3.0183167	,101.3568833);
+INSERT INTO "public"."ref_points_b" ("b_id","t_id","p_id","b_name","b_operator","b_status","facility_type","latitude","longitude")	VALUES ('132',	'367',	'491',	'No 10'	,'north'	,'Active'	,'dry'	,3.0212333	,101.35695);
+INSERT INTO "public"."ref_points_b" ("b_id","t_id","p_id","b_name","b_operator","b_status","facility_type","latitude","longitude")	VALUES ('133',	'367',	'491',	'No 11'	,'north'	,'Active'	,'dry'	,3.0235833	,101.3570167);
+INSERT INTO "public"."ref_points_b" ("b_id","t_id","p_id","b_name","b_operator","b_status","facility_type","latitude","longitude")	VALUES ('166',	'367',	'495',	'B01'	,'west'	,'Active'	,'dry'	,2.95795	,101.3078167);
+INSERT INTO "public"."ref_points_b" ("b_id","t_id","p_id","b_name","b_operator","b_status","facility_type","latitude","longitude")	VALUES ('167',	'367',	'495',	'B02'	,'west'	,'Active'	,'dry'	,2.9563667	,101.3069167);
+INSERT INTO "public"."ref_points_b" ("b_id","t_id","p_id","b_name","b_operator","b_status","facility_type","latitude","longitude")	VALUES ('168',	'367',	'495',	'B03'	,'west'	,'Active'	,'dry'	,2.9547833	,101.3059833);
+INSERT INTO "public"."ref_points_b" ("b_id","t_id","p_id","b_name","b_operator","b_status","facility_type","latitude","longitude")	VALUES ('169',	'367',	'495',	'B04'	,'west'	,'Active'	,'dry'	,2.9532167	,101.3051);
+INSERT INTO "public"."ref_points_b" ("b_id","t_id","p_id","b_name","b_operator","b_status","facility_type","latitude","longitude")	VALUES ('170',	'367',	'495',	'B05'	,'west'	,'Active'	,'dry'	,2.9516667	,101.3042167);
+INSERT INTO "public"."ref_points_b" ("b_id","t_id","p_id","b_name","b_operator","b_status","facility_type","latitude","longitude")	VALUES ('171',	'367',	'495',	'B06'	,'west'	,'Active'	,'dry'	,2.9499333	,101.3032333);
