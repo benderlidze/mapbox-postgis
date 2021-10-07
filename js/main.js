@@ -810,9 +810,13 @@ async function fetchPOINTS(layerId, prefix, filter) {
 
         const collection = turf.featureCollection(c);
 
-        geoPointData = collection;
-
         const layerName = prefix + layerId;
+
+        console.log('layerName', layerName);
+        if (layerName === "points_b") {
+            geoPointData = collection;
+        }
+
         // console.log('layerName!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', layerName);
 
         // if (map.getSource(layerName)) map.removeSource(layerName);
