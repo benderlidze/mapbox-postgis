@@ -12,7 +12,6 @@ const tablesAndProps = { //all fields that should be send to DB
             { name: 'recv_type', type: "dropdown" },
             { name: 'p_name', type: "input", disabled: true },
             { name: 'table_id', type: "input", disabled: true },
-            // { name: 'userid', type: "input" },
         ],
         layerColor: "orange"
     },
@@ -81,11 +80,17 @@ let currentPolygonUniqueID;
 const userName = "USER NAME";
 
 //const info = document.getElementById("info");
+const dotsDropdown = document.getElementById("dotsDropdown");
+const pointsDropdown = document.getElementById("pointsDropdown");
+
 const polygonInfo = document.getElementById("polygonInfo");
 const toggleLayers = document.getElementById("toggleLayers");
 const loadExistingPolygons = document.getElementById("loadExistingPolygons");
 const savePolygon = document.getElementById("savePolygon")
 const allPolygons = [];
+
+let geoPointData = [];
+let geoDotsData = [];
 
 const serverApiURL = 'http://176.223.134.242/~test/API.php';
 
@@ -133,6 +138,7 @@ map.on("load", () => {
 })
 
 fetchDataForDropdownLists();
+fetchPointsDotsDropdown();//for Geo Point and Geo DOTS
 
 toggleLayers.addEventListener("click", () => {
 
@@ -143,21 +149,7 @@ toggleLayers.addEventListener("click", () => {
         map.setLayoutProperty('raster-satellite-streets', 'visibility', 'visible')
         toggleLayers.innerHTML = "streets"
     }
-
-
 })
-
-//save button 
-/*
-savePolygon.addEventListener("click", () => {
-    const data = draw.getSelected();
-    if (data.features.length > 0) {//we have at least one selected polygon
-        data.features[0].geometry['crs'] = { "type": "name", "properties": { "name": "EPSG:3857" } };
-        savePolygonData(data.features[0].geometry)
-        draw.changeMode("simple_select")
-    }
-})
-*/
 
 
 Array.from(document.getElementsByName("points")).forEach(i => {
@@ -183,6 +175,72 @@ Array.from(document.getElementsByName("load")).forEach(i => {
     })
 })
 
+const pointsDropdownFilter = [];
+const dotsDropdownFilter = [];
+
+pointsDropdown.addEventListener("input", e => { //get Geo Point filter value on multiple dropdown select 
+
+    const options = [...pointsDropdown.options]
+        .filter((x) => x.selected)
+        .map((x) => x.value);
+
+    pointsDropdownFilter.length = 0;
+    pointsDropdownFilter.push(...options)
+    console.log('pointsDropdownFilter', pointsDropdownFilter);
+
+    if (map.getSource('points_b')) {
+        const data = geoPointData.features.filter(i => pointsDropdownFilter.includes(i.properties.facility_type))
+        console.log('data', data);
+
+        const collection = turf.featureCollection(data);
+        map.getSource('points_b').setData(collection)
+    }
+
+})
+
+dotsDropdown.addEventListener("input", e => {//get Geo DOTS filter value on multiple dropdown select 
+
+    const options = [...dotsDropdown.options]
+        .filter((x) => x.selected)
+        .map((x) => x.value);
+
+    dotsDropdownFilter.length = 0;
+    dotsDropdownFilter.push(...options)
+    console.log('dotsDropdownFilter', dotsDropdownFilter);
+
+
+    //get active geo dots 
+    const checked = [...document.querySelectorAll("[name=dots]:checked")].map(i => i.value);
+    checked.forEach(d => {
+        console.log('d', d);
+        if (map.getSource(d)) {
+            const data = geoDotsData[d].features.filter(i => dotsDropdownFilter.includes(i.properties.status))
+            console.log('data', data);
+            const collection = turf.featureCollection(data);
+            map.getSource(d).setData(collection)
+        }
+
+    })
+
+
+})
+
+function updateGeoPoints() {
+
+}
+
+async function fetchPointsDotsDropdown() {
+    const f = await fetch(serverApiURL + "?getPointsDotsDropdown");
+    const j = await f.json()
+    console.log('fetchPointsDotsDropdown', j);
+    if (j && j.error === "") {
+
+        console.log('j', j);
+        j.data.facility_types.forEach(d => pointsDropdown.add(new Option(d, d)));
+        j.data.status.forEach(d => dotsDropdown.add(new Option(d, d)));
+
+    }
+}
 
 function togglePOINTS(layer) {
     console.log('layer', layer);
@@ -194,9 +252,13 @@ function togglePOINTS(layer) {
         if (index !== -1) {
             allPOINTSLayers.splice(index, 1);
         }
-        //remove loaded polygons
+
+        //remove loaded polygons and off mouse events
         map.removeLayer(layerWithPrefix);
         map.removeSource(layerWithPrefix);
+        map.off("click", layerWithPrefix, showPopup)
+        map.off('mouseenter', layerWithPrefix, mouseEnter);
+        map.off('mouseleave', layerWithPrefix, mouseLeave);
 
     } else {
         allPOINTSLayers.push(layerWithPrefix)
@@ -212,6 +274,9 @@ function toggleDOTS(layer) {
         //remove loaded polygons
         map.removeLayer(layer);
         map.removeSource(layer);
+        map.off("click", layer, showPopup)
+        map.off('mouseenter', layer, mouseEnter);
+        map.off('mouseleave', layer, mouseLeave);
 
     } else {
         allDOTSLayers.push(layer)
@@ -263,9 +328,9 @@ function updateProps(geometry) {
         /*
         const center = turf.centerOfMass(geometry.features[0]);
         console.log('center', center);
-
+ 
         if (center) {
-
+ 
             popup = new mapboxgl.Popup({
                 closeOnClick: false,
                 className: "mpopup",
@@ -430,7 +495,7 @@ function buildPropsByPolygonType(inputData) {
     })
 
     const type_an = `
-    <h3>${selectedPolygonType}</h3>
+    <b>${selectedPolygonType}</b>
 
     <div class="dataBlock"  style="display:flex;flex-direction: column;">
 
@@ -451,7 +516,7 @@ function buildPropsByPolygonType(inputData) {
         polygonInfo.innerHTML = text;
     }
 
-    
+
     //return text;
 }
 
@@ -461,7 +526,6 @@ document.addEventListener("click", e => {
     if (e.target.classList.contains("saveButton")) {
         console.log('SAVE button');
     }
-
 
     const selectedPType = Array.from(document.getElementsByName('polygonType')).filter(i => i.checked)
     if (selectedPType.length > 0) {
@@ -482,7 +546,7 @@ document.addEventListener("click", e => {
 })
 
 
-function clearCurrentPolygonUniqueID(){ //clear currentPolygonUniqueID after saving the data 
+function clearCurrentPolygonUniqueID() { //clear currentPolygonUniqueID after saving the data 
     currentPolygonUniqueID = '';
 }
 
@@ -731,31 +795,45 @@ async function fetchPolygonData(layerId) {
         map.on("click", layerId, editPolygon)
     }
 }
-async function fetchPOINTS(layerId, prefix) {
+async function fetchPOINTS(layerId, prefix, filter) {
 
     const f = await fetch(serverApiURL + "?getPOINTS&typeId=" + layerId.toLowerCase());
     const j = await f.json()
-    console.log('j', j);
+    console.log('j', j, layerId, prefix);
     if (j && j.error === "" && j.data.length > 0) {
 
         const c = j.data.map(i => {
             console.log('i', i);
             console.log('i', i.latitude);
-
             return turf.point([+i.longitude, +i.latitude], i)
         });
 
         const collection = turf.featureCollection(c);
 
-        map.addSource(prefix + layerId, {
+        geoPointData = collection;
+
+        const layerName = prefix + layerId;
+        // console.log('layerName!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', layerName);
+
+        // if (map.getSource(layerName)) map.removeSource(layerName);
+        // if (map.getLayer(layerName)) {
+        //     console.log('OFFFFFFFFFFFFFFF',);
+        //     map.removeLayer(layerName)
+        //     map.off("click", layerName, showPopup)
+        //     map.off('mouseenter', layerName, mouseEnter);
+        //     map.off('mouseleave', layerName, mouseLeave);
+        // };
+
+
+        map.addSource(layerName, {
             'type': 'geojson',
             'data': collection
         });
 
         map.addLayer({
-            'id': prefix + layerId,
+            'id': layerName,
             'type': 'symbol',
-            'source': prefix + layerId,
+            'source': layerName,
             'layout': {
                 'text-field': '■',
                 'text-size': 25,
@@ -767,22 +845,10 @@ async function fetchPOINTS(layerId, prefix) {
             }
         });
 
+        map.on("click", layerName, showPopup)
+        map.on('mouseenter', layerName, mouseEnter);
+        map.on('mouseleave', layerName, mouseLeave);
 
-        map.on("click", prefix + layerId, showPopup)
-        map.on('mouseenter', prefix + layerId, mouseEnter);
-        map.on('mouseleave', prefix + layerId, mouseLeave);
-        // Add a new layer to visualize the polygon.
-        /*
-        map.addLayer({
-            'id': prefix + layerId,
-            'type': 'circle',
-            'source': prefix + layerId,
-            'paint': {
-                'circle-radius': 5,
-                'circle-color': "blue"
-            }
-        });
-        */
     }
 }
 async function fetchDOTS(layerId) {
@@ -799,6 +865,8 @@ async function fetchDOTS(layerId) {
         });
 
         const collection = turf.featureCollection(c);
+
+        geoDotsData[layerId] = collection;
 
         map.addSource(layerId, {
             'type': 'geojson',

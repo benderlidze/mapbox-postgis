@@ -28,9 +28,8 @@
                 <div id="panel" class="d-flex flex-column">
                     <div class="tab">
                         <div>
-                            <div>Login as User name </div>
-                            <button type="button" class="btn btn-secondary btn-sm">Logout</button>
-                            <!-- <button type="button" id="savePolygon" class="btn btn-secondary btn-sm">Save</button> -->
+                            <div>Login as User name <button type="button"
+                                    class="btn btn-secondary btn-sm">Logout</button></div>
                         </div>
                     </div>
 
@@ -58,6 +57,11 @@
                                 <label class="form-check-label" for="T">
                                     T
                                 </label>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-sm-12">
+                                <select name="" class="form-select form-select-sm" id="pointsDropdown" multiple size="2" aria-label="size 2 select"  ></select>
                             </div>
                         </div>
                     </div>
@@ -93,7 +97,15 @@
                                     H
                                 </label>
                             </div>
+
                         </div>
+
+                        <div class="row mb-2">
+                            <div class="col-sm-12">
+                                <select name="" class="form-select form-select-sm" id="dotsDropdown" multiple size="2" aria-label="size 2 select"></select>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div id="points" class="tab">
@@ -123,7 +135,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div>
+                        <div class="d-flex ">
                             <div class="form-check m-1">
                                 <input class="form-check-input" type="checkbox" name="load" value="poly_s_r" id="subsr">
                                 <label class="form-check-label" for="subsr">
@@ -161,7 +173,7 @@
                                 </label>
                             </div>
                         </div>
-                        <div>
+                        <div class="d-flex ">
                             <div class="form-check m-1">
                                 <input class="form-check-input" type="radio" name="polygonType" value="" id="poly_s_r">
                                 <label class="form-check-label" for="poly_s_r">
