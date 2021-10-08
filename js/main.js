@@ -35,7 +35,7 @@ const tablesAndProps = { //all fields that should be send to DB
         fields: [
 
             { name: 'p_id', type: "input", checkType: 'INTEGER', callback: `getPName(this.value)` },
-            { name: 'p_group', type: "input" },
+            { name: 'p_group', type: "dropdown" },
             { name: 'p_name', type: "input", disabled: true },
             { name: 'table_id', type: "input", disabled: true }
             // { name: 'poly_array', type: "input" },
@@ -77,7 +77,7 @@ const allDOTSLayers = [];
 const allPOINTSLayers = [];
 
 let currentPolygonUniqueID;
-const userName = "USER NAME";
+let userName = "USER NAME";
 
 //const info = document.getElementById("info");
 const dotsDropdown = document.getElementById("dotsDropdown");
@@ -93,8 +93,23 @@ let geoPointData = [];
 let geoDotsData = [];
 
 let currentEditPolygon = "";
-
 const serverApiURL = 'http://176.223.134.242/~test/API.php';
+
+
+
+//MODAL WINDOW set user name part
+const modal = document.getElementById("myModal");
+const btn = document.getElementById("myBtn");
+const span = document.getElementsByClassName("close")[0];
+modal.style.display = "block";
+const selectUserName = document.getElementById("selectUserName")
+const usersArray = ['Dennis Yang', "Serg P", "Test user"]
+usersArray.forEach(d => selectUserName.add(new Option(d, d)));
+const setUserNameButton = document.getElementById("setUserNameButton");
+setUserNameButton.addEventListener("click", () => {
+    userName = selectUserName.value;
+    modal.style.display = "none";
+})
 
 mapboxgl.accessToken = 'pk.eyJ1Ijoic2Vyc2Vyc2VyIiwiYSI6ImNrZnBpaWF5azBpMWMyeHBmdzJpdno1NzgifQ.4vBDF2DNuk-beXljllf3Yg';
 const map = new mapboxgl.Map({
@@ -479,6 +494,12 @@ function buildPropsByPolygonType(inputData) {
                     return { id: i.poly_r_name, val: i.poly_r_name }
                 })
             }
+            if (i.name === 'p_group') {
+                data = dataForDropdownLists.data.p_group.map(i => {
+                    // return { id: i.recv_type_id, val: i.recv_type }
+                    return { id: i.p_group, val: i.p_group }
+                })
+            }
             if (i.name === 'working') {
                 data = [
                     { id: 'Yes', val: 'Yes' },
@@ -672,7 +693,7 @@ function savePolygonAndData() {
 
                 //if (map.getLayer(selectedPolygonType)) map.removeSource(selectedPolygonType);
                 //if (map.getLayer(selectedPolygonType)) map.removeLayer(selectedPolygonType);
-                
+
                 fetchPolygonData(selectedPolygonType)
 
                 alert("Saved successfully.")
