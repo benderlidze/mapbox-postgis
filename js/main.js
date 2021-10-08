@@ -2,7 +2,7 @@
 const tablesAndProps = { //all fields that should be send to DB 
     'poly_an': {
         fields: [
-            { name: 'poly_an_id', type: "input", checkType: 'INTEGER' },
+            { name: 'poly_an_id', type: "input", checkType: 'INTEGER', disabled: true },
             { name: 'poly_an_name', type: "input" },
             { name: 'p_id', type: "input", checkType: 'INTEGER', callback: `getPName(this.value)` },
             { name: 'working', type: "dropdown" },
@@ -706,6 +706,12 @@ async function getBName(b_id) {
 
     document.getElementById("p_name").value = p_name;
     document.getElementById("b_name").value = b_name;
+
+    if (p_name === "" || b_name === "") {
+        document.querySelector(".savePolygonData").disabled = true
+    } else {
+        document.querySelector(".savePolygonData").disabled = false
+    }
 }
 async function getPName(id) {
     id = Number(id);
@@ -719,6 +725,12 @@ async function getPName(id) {
     }
 
     document.getElementById("p_name").value = p_name;
+
+    if (p_name === "") {
+        document.querySelector(".savePolygonData").disabled = true
+    } else {
+        document.querySelector(".savePolygonData").disabled = false
+    }
 }
 
 async function fetchDataForDropdownLists() {
@@ -828,6 +840,11 @@ async function fetchPOINTS(layerId, prefix, filter) {
         //     map.off('mouseleave', layerName, mouseLeave);
         // };
 
+        const colors = {
+            'p': 'blue',
+            'b': 'green',
+            't': '#4B0082'
+        }
 
         map.addSource(layerName, {
             'type': 'geojson',
@@ -845,7 +862,7 @@ async function fetchPOINTS(layerId, prefix, filter) {
                 'text-allow-overlap': true,
             },
             'paint': {
-                'text-color': colorArray[allPOINTSLayers.length],
+                'text-color': colors[layerId],
             }
         });
 
@@ -872,6 +889,13 @@ async function fetchDOTS(layerId) {
 
         geoDotsData[layerId] = collection;
 
+        const colors = {
+            'c': 'red',
+            'p': 'yellow',
+            's': 'orange',
+            'h': 'purple'
+        }
+
         map.addSource(layerId, {
             'type': 'geojson',
             'data': collection
@@ -884,7 +908,8 @@ async function fetchDOTS(layerId) {
             'source': layerId,
             'paint': {
                 'circle-radius': 5,
-                'circle-color': colorArray[allDOTSLayers.length]
+                //'circle-color': colorArray[allDOTSLayers.length]
+                'circle-color': colors[layerId]
             }
         });
 
