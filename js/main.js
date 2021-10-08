@@ -77,7 +77,7 @@ const allDOTSLayers = [];
 const allPOINTSLayers = [];
 
 let currentPolygonUniqueID;
-let userName = "USER NAME";
+
 
 //const info = document.getElementById("info");
 const dotsDropdown = document.getElementById("dotsDropdown");
@@ -105,6 +105,7 @@ modal.style.display = "block";
 const logOut = document.getElementById("logOut")
 const userLoginName = document.getElementById("userLoginName")
 const selectUserName = document.getElementById("selectUserName")
+let userName = "USER NAME";
 const usersArray = ['Dennis Yang', "Serg P", "Test user"]
 usersArray.forEach(d => selectUserName.add(new Option(d, d)));
 const setUserNameButton = document.getElementById("setUserNameButton");
@@ -705,6 +706,8 @@ function savePolygonAndData() {
                 alert("Saved successfully.")
                 polygonInfo.innerHTML = '';
                 currentEditPolygon = ''; //IMPORTANT!!!!!!! CREAR CURRENT POLYGON VALUE 
+
+                fetchDataForDropdownLists()//RELOAD ALL DATA FOR POLYGONS ETC 
             }
         });
 }
