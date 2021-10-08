@@ -2,7 +2,7 @@
 const tablesAndProps = { //all fields that should be send to DB 
     'poly_an': {
         fields: [
-            { name: 'poly_an_id', type: "input", checkType: 'INTEGER', disabled: true },
+            { name: 'poly_an_id', type: "input",  disabled: true },
             { name: 'poly_an_name', type: "input" },
             { name: 'p_id', type: "input", checkType: 'INTEGER', callback: `getPName(this.value)` },
             { name: 'working', type: "dropdown" },
@@ -421,7 +421,8 @@ function updateVal(inputData) {
             if (inputData && i.cgo_id === inputData['c_type']) {
                 selected = 'selected';
             }
-            return `<option value="${i.cgo_id}" selected>${i.cgo_type}</option>`
+            // return `<option value="${i.cgo_id}" selected>${i.cgo_type}</option>`
+            return `<option value="${i.cgo_type}" selected>${i.cgo_type}</option>`
         })
 
 }
@@ -454,17 +455,20 @@ function buildPropsByPolygonType(inputData) {
             }
             if (i.name === 'c_type') {
                 data = dataForDropdownLists.data.cgo.map(i => {
-                    return { id: i.cgo_id, val: i.cgo_value }
+                    // return { id: i.cgo_id, val: i.cgo_value }
+                    return { id: i.cgo_value, val: i.cgo_value }
                 })
             }
             if (i.name === 'default_ops') {
                 data = dataForDropdownLists.data.default_ops.map(i => {
-                    return { id: i.default_ops_id, val: i.default_ops_value }
+                    // return { id: i.default_ops_id, val: i.default_ops_value }
+                    return { id: i.default_ops_value, val: i.default_ops_value }
                 })
             }
             if (i.name === 'recv_type') {
                 data = dataForDropdownLists.data.recv_type.map(i => {
-                    return { id: i.recv_type_id, val: i.recv_type }
+                    // return { id: i.recv_type_id, val: i.recv_type }
+                    return { id: i.recv_type, val: i.recv_type }
                 })
             }
             if (i.name === 'working') {
