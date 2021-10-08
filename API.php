@@ -199,6 +199,23 @@ if (isset($_DATA['polygon'])) {
 		if(isset($_DATA['table_id']) && $_DATA['table_id']!=""){
 			 
 			$table_id = $_DATA['table_id'];
+			
+			//---------- UPDATE ALL poly_s_r rows with old name to new poly_r_name from poly_r -------------
+			$result = pg_query($dbconn, 'SELECT poly_r_name FROM "public"."poly_r" where table_id = '.$table_id.' limit 1 ');
+			if (!$result) {
+				$error = "Query Error!";
+			}
+			while ($row = pg_fetch_assoc($result)) {
+				$old_name = $row['poly_r_name'];
+				
+				$result = pg_query_params($dbconn, 
+				'UPDATE "public"."poly_s_r" SET r_name = $1 where r_name = $2', 
+				array($poly_r_name,$old_name)
+				);
+			}
+
+			//---------- UPDATE ALL poly_s_r rows with old name to new poly_r_name from poly_r -------------
+			
 			$result = pg_query_params($dbconn, 
 				'UPDATE poly_r SET
 				(user_name, poly, poly_r_name) 
