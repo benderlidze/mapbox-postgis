@@ -102,13 +102,19 @@ const modal = document.getElementById("myModal");
 const btn = document.getElementById("myBtn");
 const span = document.getElementsByClassName("close")[0];
 modal.style.display = "block";
+const logOut = document.getElementById("logOut")
+const userLoginName = document.getElementById("userLoginName")
 const selectUserName = document.getElementById("selectUserName")
 const usersArray = ['Dennis Yang', "Serg P", "Test user"]
 usersArray.forEach(d => selectUserName.add(new Option(d, d)));
 const setUserNameButton = document.getElementById("setUserNameButton");
 setUserNameButton.addEventListener("click", () => {
     userName = selectUserName.value;
+    userLoginName.innerHTML = userName;
     modal.style.display = "none";
+})
+logOut.addEventListener("click", () => {
+    modal.style.display = "block";
 })
 
 mapboxgl.accessToken = 'pk.eyJ1Ijoic2Vyc2Vyc2VyIiwiYSI6ImNrZnBpaWF5azBpMWMyeHBmdzJpdno1NzgifQ.4vBDF2DNuk-beXljllf3Yg';
