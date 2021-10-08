@@ -12,6 +12,34 @@ $json = file_get_contents('php://input');
 // Converts it into a PHP object
 $_DATA = json_decode($json, true);
 
+if (isset($_GET['getPointsDotsDropdown'])) {
+	
+	$data = [];
+	$error = '';
+	
+	$result = pg_query($dbconn, 'SELECT DISTINCT(facility_type) FROM "public"."ref_points_b"');
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$data['facility_types'][] = $row['facility_type'];
+	}
+	
+	$result = pg_query($dbconn, 'SELECT DISTINCT(status) FROM "public"."ref_dots"');
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$data['status'][] = $row['status'];
+	}
+	
+	$results = array(
+		'error'=>$error,
+		'data'=>$data
+	);
+	echo json_encode($results);	
+}
+
 if (isset($_DATA['removePolygonByTableId'])) {
 	$table_name = $_DATA['table_name'];
 	$table_id = $_DATA['removePolygonByTableId'];
@@ -36,7 +64,7 @@ if (isset($_DATA['polygon'])) {
 
 	if($selectedPolygonType === "poly_an"){
 		
-		$poly_an_id = $_DATA['poly_an_id'];
+		// $poly_an_id = $_DATA['poly_an_id'];
 		$poly_an_name = $_DATA['poly_an_name'];
 		$p_id = $_DATA['p_id'];
 		$working = $_DATA['working'];
@@ -44,28 +72,30 @@ if (isset($_DATA['polygon'])) {
 		$c_cat = $_DATA['c_cat'];
 		$c_type = $_DATA['c_type'];
 		$recv_type = $_DATA['recv_type'];
+		$p_name = $_DATA['p_name'];
 		
 		//if there is a table_id - then it is an update 
 		if(isset($_DATA['table_id']) && $_DATA['table_id']!=""){
 			
 			$table_id = $_DATA['table_id'];
 			$result = pg_query_params($dbconn, 
-				'UPDATE poly_an SET
-				(user_name, poly, poly_an_id, poly_an_name, p_id, working,default_ops, c_cat,c_type, recv_type) 
+				'UPDATE poly_an 
+				SET
+				(user_name, poly, poly_an_name, p_id, working,default_ops, c_cat,c_type, recv_type, p_name) 
 				=  
 				($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9, $10)
 				where table_id = $11
 				', 
-				array($userName, $polygon, $poly_an_id, $poly_an_name, $p_id, $working, $default_ops, $c_cat, $c_type, $recv_type, $table_id)
+				array($userName, $polygon, $poly_an_name, $p_id, $working, $default_ops, $c_cat, $c_type, $recv_type, $p_name, $table_id)
 								
 			);
 		}else{
 			$result = pg_query_params($dbconn, 
 				'INSERT INTO poly_an 
-				(user_name, poly, poly_an_id, poly_an_name, p_id, working,default_ops, c_cat,c_type, recv_type) 
+				(user_name, poly,  poly_an_name, p_id, working,default_ops, c_cat,c_type, recv_type, p_name) 
 				VALUES 
-				($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9, $10)', 
-				array($userName, $polygon, $poly_an_id, $poly_an_name, $p_id, $working, $default_ops, $c_cat, $c_type, $recv_type)
+				($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9, $10 )', 
+				array($userName, $polygon,  $poly_an_name, $p_id, $working, $default_ops, $c_cat, $c_type, $recv_type, $p_name)
 			);
 		}
 	}
@@ -317,6 +347,8 @@ if (isset($_GET['getDataForDropdown'])) {
 	$default_ops = [];
 	$recv_type = [];
 	$data = [];
+	$poly_r_name = [];
+	$p_group = [];
 	$error = '';
 
 	// ------------- CGO -----------------------	
@@ -358,7 +390,31 @@ if (isset($_GET['getDataForDropdown'])) {
 		);
 	}
 	$data['recv_type'] = $recv_type;
+	// ------------------r_name----------------------
+	$result = pg_query($dbconn, 'SELECT * FROM "public"."poly_r"');
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$poly_r_name[] = array(
+				'poly_r_name'=>$row['poly_r_name'],
+		);
+	}
+	$data['poly_r_name'] = $poly_r_name;
 	
+	// ------------------r_name----------------------
+	$result = pg_query($dbconn, 'SELECT * FROM "public"."ref_p_group"');
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$p_group[] = array(
+		
+				'p_group_id'=>$row['p_group_id'],
+				'p_group'=>$row['p_group'],
+		);
+	}
+	$data['p_group'] = $p_group;
 	
 	
 	$results = array(
