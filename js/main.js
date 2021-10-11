@@ -454,12 +454,12 @@ function updateVal(inputData) {
         .filter(i => i.cgo_value === document.getElementById("c_cat").value)
         .map(i => {
             let selected = '';
-            if (inputData && i.cgo_id === inputData['c_type']) {
+            if (inputData && i.cgo_type === inputData['c_type']) {
                 selected = 'selected';
             }
             // return `<option value="${i.cgo_id}" selected>${i.cgo_type}</option>`
-            return `<option value="${i.cgo_type}" selected>${i.cgo_type}</option>`
-        })
+            return `<option value="${i.cgo_type}" ${selected}>${i.cgo_type}</option>`
+        }).join("")
 
 }
 
