@@ -25,6 +25,22 @@ if (isset($_GET['getPointsDotsDropdown'])) {
 		$data['facility_types'][] = $row['facility_type'];
 	}
 	
+	$result = pg_query($dbconn, 'SELECT DISTINCT(dry) FROM "public"."ref_points_p"');
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$data['dry_p'][] = $row['dry'];
+	}
+	
+	$result = pg_query($dbconn, 'SELECT DISTINCT(facility_type) FROM "public"."ref_points_t"');
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$data['facility_type_t'][] = $row['facility_type'];
+	}
+	
 	$result = pg_query($dbconn, 'SELECT DISTINCT(status) FROM "public"."ref_dots"');
 	if (!$result) {
 		$error = "Query Error!";
