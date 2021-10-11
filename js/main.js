@@ -82,6 +82,8 @@ let currentPolygonUniqueID;
 //const info = document.getElementById("info");
 const dotsDropdown = document.getElementById("dotsDropdown");
 const pointsDropdown = document.getElementById("pointsDropdown");
+const pointsDropdownP = document.getElementById("pointsDropdownP");
+const pointsDropdownT = document.getElementById("pointsDropdownT");
 
 const polygonInfo = document.getElementById("polygonInfo");
 const toggleLayers = document.getElementById("toggleLayers");
@@ -89,7 +91,7 @@ const loadExistingPolygons = document.getElementById("loadExistingPolygons");
 const savePolygon = document.getElementById("savePolygon")
 const allPolygons = [];
 
-let geoPointData = [];
+let geoPointData = {};
 let geoDotsData = [];
 
 let currentEditPolygon = "";
@@ -200,27 +202,34 @@ Array.from(document.getElementsByName("load")).forEach(i => {
 })
 
 const pointsDropdownFilter = [];
+const pointsDropdownFilterP = [];
+const pointsDropdownFilterT = [];
 const dotsDropdownFilter = [];
 
 pointsDropdown.addEventListener("input", e => { //get Geo Point filter value on multiple dropdown select 
+    setFilterMult(pointsDropdown, pointsDropdownFilter, 'points_b', 'facility_type')
+})
+pointsDropdownP.addEventListener("input", e => { //get Geo Point filter value on multiple dropdown select 
+    setFilterMult(pointsDropdownP, pointsDropdownFilterP, 'points_p', 'dry')
+})
+pointsDropdownT.addEventListener("input", e => { //get Geo Point filter value on multiple dropdown select 
+    setFilterMult(pointsDropdownT, pointsDropdownFilterT, 'points_t', 'facility_type')
+})
 
-    const options = [...pointsDropdown.options]
+function setFilterMult(optionsArray, array, layer_name, propsName) {
+    const options = [...optionsArray.options]
         .filter((x) => x.selected)
         .map((x) => x.value);
-
-    pointsDropdownFilter.length = 0;
-    pointsDropdownFilter.push(...options)
-    console.log('pointsDropdownFilter', pointsDropdownFilter);
-
-    if (map.getSource('points_b')) {
-        const data = geoPointData.features.filter(i => pointsDropdownFilter.includes(i.properties.facility_type))
+    array.length = 0;
+    array.push(...options)
+    console.log('pointsDropdownFilterT', array);
+    if (map.getSource(layer_name)) {
+        const data = geoPointData[layer_name].features.filter(i => array.includes(i.properties[propsName]))
         console.log('data', data);
-
         const collection = turf.featureCollection(data);
-        map.getSource('points_b').setData(collection)
+        map.getSource(layer_name).setData(collection)
     }
-
-})
+}
 
 dotsDropdown.addEventListener("input", e => {//get Geo DOTS filter value on multiple dropdown select 
 
@@ -261,6 +270,9 @@ async function fetchPointsDotsDropdown() {
 
         console.log('j', j);
         j.data.facility_types.forEach(d => pointsDropdown.add(new Option(d, d)));
+        j.data.facility_type_t.forEach(d => pointsDropdownT.add(new Option(d, d)));
+        j.data.dry_p.forEach(d => pointsDropdownP.add(new Option(d, d)));
+
         j.data.status.forEach(d => dotsDropdown.add(new Option(d, d)));
 
     }
@@ -459,9 +471,6 @@ function buildPropsByPolygonType(inputData) {
 
     if (!selectedPolygonType) { console.warn("Type of the polygon is not defined"); return; }
     if (!tablesAndProps[selectedPolygonType]) { console.warn("No props for this type of polygon"); return; }
-
-
-
 
     const fields = tablesAndProps[selectedPolygonType].fields.map(i => {
 
@@ -870,10 +879,12 @@ async function fetchPOINTS(layerId, prefix, filter) {
 
         const layerName = prefix + layerId;
 
-        console.log('layerName', layerName);
-        if (layerName === "points_b") {
-            geoPointData = collection;
+        console.log('layerName!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', layerName);
+        /*if (layerName === "points_b") {
+            geoPointData[layerName] = collection;
         }
+        */
+        geoPointData[layerName] = collection;
 
         // console.log('layerName!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', layerName);
 
