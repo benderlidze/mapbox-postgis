@@ -990,15 +990,30 @@ function mouseEnter(e) {
     const coordinates = e.features[0].geometry.coordinates.slice();
     const props = e.features[0].properties;
 
-    console.log('description', e.features[0].properties);
+    console.log('description', e.features[0]);
 
-    const descr = Object.entries(props).map(i => {
+    let descr = Object.entries(props).map(i => {
         return `
             <div>
                 <b>${i[0]}</b>: ${i[1]}
             </div>
         `
     }).join("")
+
+    //layout for point B 
+    if (e.features[0].layer.id === "points_b") {
+
+        //make b_id first
+        descr = Object.entries(props).filter(i => i[0] === 'b_id').map(i => {
+            return `<div><h6><b>${i[0]}</b>: ${i[1]}</h6></div>`
+        }).join("")
+
+        descr += Object.entries(props).filter(i => i[0] !== 'b_id').map(i => {
+            return `<div>${i[0]}: ${i[1]}</div>`
+        }).join("")
+
+
+    }
 
     map.getCanvas().style.cursor = 'pointer';
     popupDOTS.setLngLat(coordinates).setHTML(descr).addTo(map);
