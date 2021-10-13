@@ -1005,7 +1005,7 @@ function mouseEnter(e) {
 
         //make b_id first
         descr = Object.entries(props).filter(i => i[0] === 'b_id').map(i => {
-            return `<div><h6><b>${i[0]}</b>: ${i[1]}</h6></div>`
+            return `<div><h6><b>${i[0]}: ${i[1]}</b></h6></div>`
         }).join("")
 
         descr += Object.entries(props).filter(i => i[0] !== 'b_id').map(i => {
