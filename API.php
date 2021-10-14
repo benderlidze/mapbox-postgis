@@ -61,13 +61,12 @@ if (isset($_DATA['removePolygonByTableId'])) {
 	$table_id = $_DATA['removePolygonByTableId'];
 	//echo $table_name, $table_id;
 	
-	$result = pg_query_params($dbconn, 
-				'DELETE FROM 
-				"public"."'.$table_name.'" 
-				where table_id = $1;
-				', 
-				array($table_id)
-			);
+	if($table_name == "poly_b" || $table_name=="poly_an"){
+		$result = pg_query_params($dbconn,'DELETE FROM "public"."poly_an" where poly_type=\''.$table_name.'\' and table_id = $1;', array($table_id));
+	}else{
+		$result = pg_query_params($dbconn,'DELETE FROM "public"."'.$table_name.'" where table_id = $1;', array($table_id));
+	}
+	
 	$results = array("done" => "ok");
 	echo json_encode($results);		
 }
@@ -80,6 +79,7 @@ if (isset($_DATA['polygon'])) {
 
 	if($selectedPolygonType === "poly_an"){
 		
+		$poly_type = 'poly_an';
 		// $poly_an_id = $_DATA['poly_an_id'];
 		$poly_an_name = $_DATA['poly_an_name'];
 		$p_id = $_DATA['p_id'];
@@ -100,23 +100,24 @@ if (isset($_DATA['polygon'])) {
 				(user_name, poly, poly_an_name, p_id, working,default_ops, c_cat,c_type, recv_type, p_name) 
 				=  
 				($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9, $10)
-				where table_id = $11
+				where table_id = $11 and poly_type=$12
 				', 
-				array($userName, $polygon, $poly_an_name, $p_id, $working, $default_ops, $c_cat, $c_type, $recv_type, $p_name, $table_id)
+				array($userName, $polygon, $poly_an_name, $p_id, $working, $default_ops, $c_cat, $c_type, $recv_type, $p_name, $table_id, $poly_type)
 								
 			);
 		}else{
 			$result = pg_query_params($dbconn, 
 				'INSERT INTO poly_an 
-				(user_name, poly,  poly_an_name, p_id, working,default_ops, c_cat,c_type, recv_type, p_name) 
+				(user_name, poly,  poly_an_name, p_id, working,default_ops, c_cat,c_type, recv_type, p_name, poly_type) 
 				VALUES 
 				($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9, $10 )', 
-				array($userName, $polygon,  $poly_an_name, $p_id, $working, $default_ops, $c_cat, $c_type, $recv_type, $p_name)
+				array($userName, $polygon,  $poly_an_name, $p_id, $working, $default_ops, $c_cat, $c_type, $recv_type, $p_name, $poly_type)
 			);
 		}
 	}
 	
 	if($selectedPolygonType === "poly_b"){
+		$poly_type = 'poly_b';
 		
 		$b_id = $_DATA['b_id'];
 		$default_ops = $_DATA['default_ops'];
@@ -130,22 +131,22 @@ if (isset($_DATA['polygon'])) {
 			
 			$table_id = $_DATA['table_id'];
 			$result = pg_query_params($dbconn, 
-				'UPDATE poly_b SET
+				'UPDATE poly_an SET
 				(user_name, poly, b_id, default_ops, c_cat,c_type, recv_type, b_name, p_name)
 				= 
 				($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9)
-				where table_id = $10
+				where table_id = $10 and poly_type = $11
 				', 
-				array($userName, $polygon,  $b_id, $default_ops, $c_cat, $c_type, $recv_type,$b_name, $p_name, $table_id)
+				array($userName, $polygon,  $b_id, $default_ops, $c_cat, $c_type, $recv_type,$b_name, $p_name, $table_id, $poly_type)
 			);
 		}else{
 			
 			$result = pg_query_params($dbconn, 
-				'INSERT INTO poly_b 
-				(user_name, poly, b_id, default_ops, c_cat,c_type, recv_type, b_name, p_name) 
+				'INSERT INTO poly_an 
+				(user_name, poly, b_id, default_ops, c_cat,c_type, recv_type, b_name, p_name, poly_type) 
 				VALUES 
-				($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9)', 
-				array($userName, $polygon,  $b_id, $default_ops, $c_cat, $c_type, $recv_type,$b_name, $p_name)
+				($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9,$10)', 
+				array($userName, $polygon,  $b_id, $default_ops, $c_cat, $c_type, $recv_type,$b_name, $p_name,$poly_type)
 			);
 		}
 	}
@@ -304,7 +305,12 @@ if (isset($_GET['getPolygons'])) {
 	$data = [];
 	$error = '';
 	
-	$result = pg_query($dbconn, 'SELECT *,ST_AsGeoJSON(poly) as poly FROM "public"."'.$table.'"');
+	if($table == "poly_b" || $table=="poly_an"){
+		$result = pg_query($dbconn, 'SELECT *,ST_AsGeoJSON(poly) as poly FROM "public"."poly_an" where poly_type=\''.$table.'\'');
+	}else{
+		$result = pg_query($dbconn, 'SELECT *,ST_AsGeoJSON(poly) as poly FROM "public"."'.$table.'"');	
+	}
+	
 	if (!$result) {
 		$error = "Query Error!";
 	}
