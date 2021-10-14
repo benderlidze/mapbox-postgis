@@ -2,7 +2,7 @@
 const tablesAndProps = { //all fields that should be send to DB 
     'poly_an': {
         fields: [
-            { name: 'poly_an_id', type: "input", disabled: true },
+            // { name: 'poly_an_id', type: "input", disabled: true },
             { name: 'poly_an_name', type: "input" },
             { name: 'p_id', type: "input", checkType: 'INTEGER', callback: `getPName(this.value)` },
             { name: 'working', type: "dropdown" },
