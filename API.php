@@ -110,7 +110,7 @@ if (isset($_DATA['polygon'])) {
 				'INSERT INTO poly_an 
 				(user_name, poly,  poly_an_name, p_id, working,default_ops, c_cat,c_type, recv_type, p_name, poly_type) 
 				VALUES 
-				($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9, $10 )', 
+				($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9, $10,$11 )', 
 				array($userName, $polygon,  $poly_an_name, $p_id, $working, $default_ops, $c_cat, $c_type, $recv_type, $p_name, $poly_type)
 			);
 		}
@@ -127,6 +127,8 @@ if (isset($_DATA['polygon'])) {
 		$b_name = $_DATA['b_name'];
 		$p_name = $_DATA['p_name'];
 		
+		$insert_id = 0;
+		
 		if(isset($_DATA['table_id']) && $_DATA['table_id']!=""){
 			
 			$table_id = $_DATA['table_id'];
@@ -136,19 +138,37 @@ if (isset($_DATA['polygon'])) {
 				= 
 				($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9)
 				where table_id = $10 and poly_type = $11
+				RETURNING table_id
 				', 
 				array($userName, $polygon,  $b_id, $default_ops, $c_cat, $c_type, $recv_type,$b_name, $p_name, $table_id, $poly_type)
 			);
+			$insert_row = pg_fetch_row($result);
+			$insert_id = $insert_row[0];
 		}else{
 			
 			$result = pg_query_params($dbconn, 
 				'INSERT INTO poly_an 
 				(user_name, poly, b_id, default_ops, c_cat,c_type, recv_type, b_name, p_name, poly_type) 
 				VALUES 
-				($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9,$10)', 
+				($1,ST_GeomFromGeoJSON($2), $3, $4, $5, $6, $7, $8, $9,$10)
+				RETURNING table_id
+				', 
 				array($userName, $polygon,  $b_id, $default_ops, $c_cat, $c_type, $recv_type,$b_name, $p_name,$poly_type)
 			);
+			$insert_row = pg_fetch_row($result);
+			$insert_id = $insert_row[0];
 		}
+		
+		if($insert_id>0){
+			//update p_id from ref_points_b
+			$result = pg_query_params($dbconn,'UPDATE "public"."poly_an"
+				SET p_id = ref_points_b.p_id
+				FROM ref_points_b
+				WHERE poly_an.b_id = ref_points_b.b_id and poly_an.table_id = $1;',
+				array($insert_id)
+				);
+		}
+		
 	}
 	
 	if($selectedPolygonType === "poly_p"){
