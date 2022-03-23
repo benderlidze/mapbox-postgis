@@ -932,13 +932,14 @@ async function fetchPOINTS(layerId, prefix, filter) {
 async function fetchDOTS(layerId) {
     const f = await fetch(serverApiURL + "?getDOTS&typeId=" + layerId);
     const j = await f.json()
-    console.log('j', j);
+    // console.log('j', j);
     if (j && j.error === "" && j.data.length > 0) {
 
-        const c = j.data.map(i => {
-            console.log('i', i);
-            console.log('i', i.latitude);
+        const data = d3.csvParse(j.data);
 
+        const c = data.map(i => {
+            // console.log('i', i);
+            // console.log('i', i.latitude);
             return turf.point([+i.longitude, +i.latitude], i)
         });
 
