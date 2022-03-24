@@ -108,7 +108,7 @@ const logOut = document.getElementById("logOut")
 const userLoginName = document.getElementById("userLoginName")
 const selectUserName = document.getElementById("selectUserName")
 let userName = "USER NAME";
-const usersArray = ["Dennis", "Ralph"]
+const usersArray = ['Dennis Yang', "Serg P", "Test user"]
 usersArray.forEach(d => selectUserName.add(new Option(d, d)));
 const setUserNameButton = document.getElementById("setUserNameButton");
 setUserNameButton.addEventListener("click", () => {
@@ -870,6 +870,8 @@ async function fetchPOINTS(layerId, prefix, filter) {
     if (j && j.error === "" && j.data.length > 0) {
 
         const c = j.data.map(i => {
+            console.log('i', i);
+            console.log('i', i.latitude);
             return turf.point([+i.longitude, +i.latitude], i)
         });
 
@@ -928,16 +930,16 @@ async function fetchPOINTS(layerId, prefix, filter) {
     }
 }
 async function fetchDOTS(layerId) {
-    console.log('layerId', layerId);
     const f = await fetch(serverApiURL + "?getDOTS&typeId=" + layerId);
     const j = await f.json()
-    console.log('j', j);
+    // console.log('j', j);
     if (j && j.error === "" && j.data.length > 0) {
 
-        const c = d3.csvParse(j.data).map(i => {
-            console.log('i', i);
-            console.log('i', i.latitude);
+        const data = d3.csvParse(j.data);
 
+        const c = data.map(i => {
+            // console.log('i', i);
+            // console.log('i', i.latitude);
             return turf.point([+i.longitude, +i.latitude], i)
         });
 

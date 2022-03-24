@@ -7,7 +7,7 @@ ini_set('display_errors', true);
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
 
-$dbconn = pg_connect("host=127.0.0.1 port=5432 user=test_user dbname=test_polygons  password=bender123");
+$dbconn = pg_connect("host=127.0.0.1 port=5432 user=test dbname=test_db  password=123456");
 
 // takes raw data from the request
 $json = file_get_contents('php://input');
