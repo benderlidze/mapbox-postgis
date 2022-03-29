@@ -166,6 +166,13 @@ map.on("load", () => {
 fetchDataForDropdownLists();
 fetchPointsDotsDropdown();//for Geo Point and Geo DOTS
 
+//SEARCH FOR POLYGONST 
+
+fetchDataForSearch()
+
+
+
+
 toggleLayers.addEventListener("click", () => {
 
     if (map.getLayer('raster-satellite-streets').visibility === 'visible') {
@@ -802,7 +809,7 @@ async function fetchDataForSearch() {
     const j = await f.json()
     if (j && j.error === "") {
         dataForSearch = j;
-        console.log('dataForSearch', dataForSearch);
+        autocomplete(document.getElementById("search_points_p"), j)
     }
 }
 
@@ -1047,9 +1054,11 @@ function autocomplete(inp, data) {
     the text field element and an array of possible autocompleted values:*/
     var currentFocus;
 
-    const arr = data.features.map(feature => Object.entries(feature.properties).map(i => {
-        return `${i[0]} ${i[1]}<br>`
-    }).join(""))
+    console.log('data', data);
+    const arr = data.data.map(d => {
+        return `${d.p_name}, ${d.country}`
+    });
+    console.log('arr', arr);
 
     /*execute a function when someone writes in the text field:*/
     inp.addEventListener("input", function (e) {
@@ -1095,17 +1104,13 @@ function autocomplete(inp, data) {
                     (or any other open lists of autocompleted values:*/
                     closeAllLists();
 
+                    const poly = data.data[id];
 
-                    const poly = data.features[id];
-                    highlightPoly(poly.properties.id)
-
-                    inp.value = poly.properties.address
+                    inp.value = `${poly.p_name}, ${poly.country}`
 
                     if (poly) {
 
-                        var bbox = turf.bbox(poly);
-                        var bboxPolygon = turf.bboxPolygon(bbox);
-                        map.fitBounds(bboxPolygon.bbox, { padding: 250, duration: 0 });
+                        console.log('poly', poly);
                     }
 
                 });
