@@ -797,6 +797,15 @@ async function fetchDataForDropdownLists() {
     }
 }
 
+async function fetchDataForSearch() {
+    const f = await fetch(serverApiURL + "?getUniquePNameCountry=true");
+    const j = await f.json()
+    if (j && j.error === "") {
+        dataForSearch = j;
+        console.log('dataForSearch', dataForSearch);
+    }
+}
+
 
 function editPolygon(e) {
 
@@ -1032,7 +1041,6 @@ function isInt(value) {
         !isNaN(parseInt(value, 10));
 }
 
-autocomplete(document.getElementById("search_points_p"), [])
 
 function autocomplete(inp, data) {
     /*the autocomplete function takes two arguments,

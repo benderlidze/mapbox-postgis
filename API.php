@@ -519,7 +519,7 @@ if (isset($_GET['getUniquePNameCountry'])) {
 			'country' => $row['country']
 		);
 	}
-	$data['p_group'] = $p_group;
+	$data = $p_group;
 
 	$results = array(
 		'error' => $error,
