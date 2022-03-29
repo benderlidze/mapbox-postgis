@@ -506,6 +506,7 @@ if (isset($_GET['getDataForDropdown'])) {
 
 if (isset($_GET['getUniquePNameCountry'])) {
 
+	$error = '';
 	$result = pg_query($dbconn, 'SELECT p_id, p_name, country FROM "public"."ref_points_p"');
 
 	if (!$result) {
