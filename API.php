@@ -509,13 +509,20 @@ if (isset($_DATA['getUniquePNameCountry'])) {
 
 	$result = pg_query($dbconn, 'SELECT DISTINCT(p_id, p_name, country) FROM "public"."ref_points_p"');
 
+	$result = pg_query($dbconn, 'SELECT * FROM "public"."ref_p_group"');
 	if (!$result) {
 		$error = "Query Error!";
 	}
 	while ($row = pg_fetch_assoc($result)) {
-		$data = $row;
+		$p_group[] = array(
+
+			'p_group_id' => $row['p_group_id'],
+			'p_group' => $row['p_group'],
+		);
 	}
-	var_dump($data);
+	$data['p_group'] = $p_group;
+
+
 	$results = array(
 		'error' => $error,
 		'data' => $data
