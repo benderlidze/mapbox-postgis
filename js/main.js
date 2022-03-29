@@ -95,7 +95,7 @@ let geoPointData = {};
 let geoDotsData = [];
 
 let currentEditPolygon = "";
-const serverApiURL = 'http://89.47.161.27/mapbox-postgis/api.php';
+const serverApiURL = 'http://89.47.161.27/mapbox-postgis/API.php';
 
 
 
