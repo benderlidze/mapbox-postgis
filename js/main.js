@@ -95,7 +95,7 @@ let geoPointData = {};
 let geoDotsData = [];
 
 let currentEditPolygon = "";
-const serverApiURL = 'https://89.47.161.27/api.php';
+const serverApiURL = 'http://89.47.161.27/mapbox-postgis/api.php';
 
 
 
@@ -1032,7 +1032,7 @@ function isInt(value) {
         !isNaN(parseInt(value, 10));
 }
 
-autocomplete(document.getElementById("search_points_p"), data)
+autocomplete(document.getElementById("search_points_p"), [])
 
 function autocomplete(inp, data) {
     /*the autocomplete function takes two arguments,
