@@ -515,6 +515,7 @@ if (isset($_DATA['getUniquePNameCountry'])) {
 	while ($row = pg_fetch_assoc($result)) {
 		$data = $row;
 	}
+	var_dump($data);
 	$results = array(
 		'error' => $error,
 		'data' => $data
