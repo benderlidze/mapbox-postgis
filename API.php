@@ -547,8 +547,6 @@ if (isset($_GET['getUniqueCType'])) {
 		'error' => $error,
 		'data' => $data
 	);
-
-	var_dump($result);
 	echo json_encode($results);
 }
 
