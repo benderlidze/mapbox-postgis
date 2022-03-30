@@ -528,6 +528,30 @@ if (isset($_GET['getUniquePNameCountry'])) {
 	echo json_encode($results);
 }
 
+if (isset($_GET['getUniqueCType'])) {
+
+	$error = '';
+	$result = pg_query($dbconn, 'SELECT DISTINCT(c_type)  FROM "public"."poly_an"');
+
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$p_group[] = array(
+			'c_type' => $row['c_type']
+		);
+	}
+	$data = $p_group;
+
+	$results = array(
+		'error' => $error,
+		'data' => $data
+	);
+
+	var_dump($result);
+	echo json_encode($results);
+}
+
 function array2csv($data, $delimiter = ',', $enclosure = '"', $escape_char = "\\")
 {
 	$f = fopen('php://memory', 'r+');

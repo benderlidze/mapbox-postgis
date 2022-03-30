@@ -169,6 +169,7 @@ fetchPointsDotsDropdown();//for Geo Point and Geo DOTS
 //SEARCH FOR POLYGONST 
 
 fetchDataForSearch()
+fetchDataForCType()
 
 
 
@@ -810,6 +811,16 @@ async function fetchDataForSearch() {
     if (j && j.error === "") {
         dataForSearch = j;
         autocomplete(document.getElementById("search_points_p"), j)
+    }
+}
+async function fetchDataForCType() {
+    const f = await fetch(serverApiURL + "?getUniqueCType=true");
+    const j = await f.json()
+    if (j && j.error === "") {
+        dataForSearch = j;
+        autocompleteSimple(document.getElementById("search_c_type"), j, () => {
+            console.log('123', 123);
+        })
     }
 }
 
