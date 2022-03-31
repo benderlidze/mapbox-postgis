@@ -819,7 +819,13 @@ async function fetchDataForCType() {
     if (j && j.error === "") {
 
         console.log('j', j);
-        autocompleteSimple(document.getElementById("search_c_type"), j, () => {
+        autocompleteSimple(document.getElementById("search_c_type"), j, 'c_type', () => {
+            console.log('123', 123);
+        })
+        autocompleteSimple(document.getElementById("search_c_cat"), j, 'c_cat', () => {
+            console.log('123', 123);
+        })
+        autocompleteSimple(document.getElementById("search_recv_type"), j, 'recv_type', () => {
             console.log('123', 123);
         })
     }
@@ -1061,13 +1067,13 @@ function isInt(value) {
 }
 
 
-function autocompleteSimple(inp, data, callback) {
+function autocompleteSimple(inp, data, element, callback) {
     /*the autocomplete function takes two arguments,
     the text field element and an array of possible autocompleted values:*/
     var currentFocus;
 
     const arr = data.data.map(d => {
-        return d
+        return d[element]
     });
 
     /*execute a function when someone writes in the text field:*/
@@ -1103,7 +1109,6 @@ function autocompleteSimple(inp, data, callback) {
                 b.innerHTML += "<strong>" + arr[i].substr(start, val.length) + "</strong>";
                 b.innerHTML += arr[i].substr(end, arr[i].length);
 
-
                 /*insert a input field that will hold the current array item's value:*/
                 b.innerHTML += "<input type='hidden' id=" + i + " value='" + arr[i] + "'>";
                 /*execute a function when someone clicks on the item value (DIV element):*/
@@ -1116,7 +1121,7 @@ function autocompleteSimple(inp, data, callback) {
 
                     const poly = data.data[id];
 
-                    inp.value = `${poly}`
+                    inp.value = `${poly[element]}`
 
                     if (poly) {
                         if (callback && typeof callback === 'function') {
