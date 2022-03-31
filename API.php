@@ -528,6 +528,32 @@ if (isset($_GET['getUniquePNameCountry'])) {
 	echo json_encode($results);
 }
 
+
+//=====================
+//=====================
+//=====================
+if (isset($_GET['getUniqueRName'])) {
+
+	$error = '';
+	$result = pg_query($dbconn, 'SELECT DISTINCT r_name FROM "public"."poly_s_r"');
+
+	if (!$result) {
+		$error = "Query Error!";
+	}
+	while ($row = pg_fetch_assoc($result)) {
+		$data[] = array(
+			'r_name' => $row['r_name'],
+		);
+	}
+	$data = $p_group;
+
+	$results = array(
+		'error' => $error,
+		'data' => $data
+	);
+	echo json_encode($results);
+}
+
 if (isset($_GET['getUniqueCType'])) {
 
 	$error = '';
@@ -551,6 +577,10 @@ if (isset($_GET['getUniqueCType'])) {
 	);
 	echo json_encode($results);
 }
+//=====================
+//=====================
+//=====================
+
 
 function array2csv($data, $delimiter = ',', $enclosure = '"', $escape_char = "\\")
 {
