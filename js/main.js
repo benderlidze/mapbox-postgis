@@ -817,7 +817,8 @@ async function fetchDataForCType() {
     const f = await fetch(serverApiURL + "?getUniqueCType=true");
     const j = await f.json()
     if (j && j.error === "") {
-        dataForSearch = j;
+
+        console.log('j', j);
         autocompleteSimple(document.getElementById("search_c_type"), j, () => {
             console.log('123', 123);
         })

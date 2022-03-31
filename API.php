@@ -537,11 +537,8 @@ if (isset($_GET['getUniqueCType'])) {
 		$error = "Query Error!";
 	}
 	while ($row = pg_fetch_assoc($result)) {
-		$p_group[] = array(
-			'c_type' => $row['c_type']
-		);
+		$data[] =  $row['c_type'];
 	}
-	$data = $p_group;
 
 	$results = array(
 		'error' => $error,
