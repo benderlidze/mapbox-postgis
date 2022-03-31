@@ -242,12 +242,18 @@ function setFilterMult(optionsArray, array, layer_name, propsName) {
         .map((x) => x.value);
     array.length = 0;
     array.push(...options)
-    console.log('pointsDropdownFilterT', array);
+    console.log('pointsDropdownFilterT', array, layer_name, propsName);
     if (map.getSource(layer_name)) {
         const data = geoPointData[layer_name].features
-            .filter(i => array.includes(i.properties[propsName]))
-            .filter(i => {//
-                if (filters.geoPointPID.p_id !== 0) { return +i.properties.p_id === +filters.geoPointPID }
+            .filter(i => {
+                if (array.length > 0) {
+                    return array.includes(i.properties[propsName])
+                } else {
+                    return i
+                }
+            })
+            .filter(i => {//CITY FILTER
+                if (filters.geoPointPID && filters.geoPointPID !== 0) { return +i.properties.p_id === +filters.geoPointPID }
                 else { return i }
             })
 
@@ -294,7 +300,6 @@ async function fetchPointsDotsDropdown() {
         j.data.facility_types.forEach(d => pointsDropdown.add(new Option(d, d)));
         j.data.facility_type_t.forEach(d => pointsDropdownT.add(new Option(d, d)));
         j.data.dry_p.forEach(d => pointsDropdownP.add(new Option(d, d)));
-
         j.data.status.forEach(d => dotsDropdown.add(new Option(d, d)));
 
     }
@@ -322,6 +327,8 @@ function togglePOINTS(layer) {
         allPOINTSLayers.push(layerWithPrefix)
         fetchPOINTS(layer, 'points_')
     }
+
+    updateGeoPoints()
 }
 function toggleDOTS(layer) {
     if (allDOTSLayers.includes(layer)) {
@@ -827,7 +834,8 @@ async function fetchDataForSearch() {
         dataForSearch = j;
         autocomplete(document.getElementById("search_points_p"), j)//for Polygons
         autocomplete(document.getElementById("search_geo_city"), j, id => {
-            filters.geoPointPID = id.p_id;
+            console.log('id', id);
+            filters.geoPointPID = id;
             updateGeoPoints()
         }) //for GEO point
     }
@@ -1231,8 +1239,12 @@ function autocomplete(inp, data, callback) {
 
     /*execute a function when someone writes in the text field:*/
     inp.addEventListener("input", function (e) {
+
         var a, b, i, val = this.value;
         /*close any already open lists of autocompleted values*/
+
+        if (val === "") callback(0);
+
         closeAllLists();
         if (!val) { return false; }
         currentFocus = -1;
@@ -1282,7 +1294,7 @@ function autocomplete(inp, data, callback) {
                     }
 
                     if (callback && typeof callback === 'function') {
-                        callback(poly)
+                        callback(poly.p_id)
                     }
 
                 });
