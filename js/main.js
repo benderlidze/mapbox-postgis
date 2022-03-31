@@ -72,6 +72,11 @@ let popup;
 let selectedPolygonType = ""
 let dataForDropdownLists = ""
 let s;
+
+let filters = {
+    geoPointPID: 0,
+}
+
 const allPolygonLayers = [];
 const allDOTSLayers = [];
 const allPOINTSLayers = [];
@@ -225,6 +230,12 @@ pointsDropdownT.addEventListener("input", e => { //get Geo Point filter value on
     setFilterMult(pointsDropdownT, pointsDropdownFilterT, 'points_t', 'facility_type')
 })
 
+function updateGeoPoints() {
+    setFilterMult(pointsDropdown, pointsDropdownFilter, 'points_b', 'facility_type')
+    setFilterMult(pointsDropdownP, pointsDropdownFilterP, 'points_p', 'dry')
+    setFilterMult(pointsDropdownT, pointsDropdownFilterT, 'points_t', 'facility_type')
+}
+
 function setFilterMult(optionsArray, array, layer_name, propsName) {
     const options = [...optionsArray.options]
         .filter((x) => x.selected)
@@ -233,7 +244,13 @@ function setFilterMult(optionsArray, array, layer_name, propsName) {
     array.push(...options)
     console.log('pointsDropdownFilterT', array);
     if (map.getSource(layer_name)) {
-        const data = geoPointData[layer_name].features.filter(i => array.includes(i.properties[propsName]))
+        const data = geoPointData[layer_name].features
+            .filter(i => array.includes(i.properties[propsName]))
+            .filter(i => {//
+                if (filters.geoPointPID.p_id !== 0) { return +i.properties.p_id === +filters.geoPointPID }
+                else { return i }
+            })
+
         console.log('data', data);
         const collection = turf.featureCollection(data);
         map.getSource(layer_name).setData(collection)
@@ -266,10 +283,6 @@ dotsDropdown.addEventListener("input", e => {//get Geo DOTS filter value on mult
 
 
 })
-
-function updateGeoPoints() {
-
-}
 
 async function fetchPointsDotsDropdown() {
     const f = await fetch(serverApiURL + "?getPointsDotsDropdown");
@@ -812,7 +825,11 @@ async function fetchDataForSearch() {
     const j = await f.json()
     if (j && j.error === "") {
         dataForSearch = j;
-        autocomplete(document.getElementById("search_points_p"), j)
+        autocomplete(document.getElementById("search_points_p"), j)//for Polygons
+        autocomplete(document.getElementById("search_geo_city"), j, id => {
+            filters.geoPointPID = id.p_id;
+            updateGeoPoints()
+        }) //for GEO point
     }
 }
 async function fetchDataForCType() {
@@ -839,7 +856,6 @@ async function fetchDataForRName() {
         })
     }
 }
-
 
 function editPolygon(e) {
 
@@ -1204,7 +1220,7 @@ function autocompleteSimple(inp, data, element, callback) {
     });
 }
 
-function autocomplete(inp, data) {
+function autocomplete(inp, data, callback) {
     /*the autocomplete function takes two arguments,
     the text field element and an array of possible autocompleted values:*/
     var currentFocus;
@@ -1263,6 +1279,10 @@ function autocomplete(inp, data) {
 
                     if (poly) {
                         console.log('poly', poly);
+                    }
+
+                    if (callback && typeof callback === 'function') {
+                        callback(poly)
                     }
 
                 });
