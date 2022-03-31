@@ -1067,7 +1067,7 @@ function autocompleteSimple(inp, data, callback) {
     var currentFocus;
 
     const arr = data.data.map(d => {
-        return `${d.p_name}, ${d.country}`
+        return d
     });
 
     /*execute a function when someone writes in the text field:*/
@@ -1116,7 +1116,7 @@ function autocompleteSimple(inp, data, callback) {
 
                     const poly = data.data[id];
 
-                    inp.value = `${poly.p_name}, ${poly.country} ,${poly.p_id}`
+                    inp.value = `${poly}`
 
                     if (poly) {
                         if (callback && typeof callback === 'function') {

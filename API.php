@@ -531,14 +531,19 @@ if (isset($_GET['getUniquePNameCountry'])) {
 if (isset($_GET['getUniqueCType'])) {
 
 	$error = '';
-	$result = pg_query($dbconn, 'SELECT DISTINCT(c_type)  FROM "public"."poly_an"');
+	$result = pg_query($dbconn, 'SELECT DISTINCT c_cat,c_type, recv_type FROM "public"."poly_an"');
 
 	if (!$result) {
 		$error = "Query Error!";
 	}
 	while ($row = pg_fetch_assoc($result)) {
-		$data[] =  $row['c_type'];
+		$data[] = array(
+			'c_type' => $row['c_type'],
+			'c_cat' => $row['c_cat'],
+			'recv_type' => $row['recv_type']
+		);
 	}
+	$data = $p_group;
 
 	$results = array(
 		'error' => $error,
