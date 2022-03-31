@@ -545,7 +545,7 @@ if (isset($_GET['getUniqueRName'])) {
 			'r_name' => $row['r_name'],
 		);
 	}
-	$data = $p_group;
+	//$data = $p_group;
 
 	$results = array(
 		'error' => $error,
@@ -569,7 +569,7 @@ if (isset($_GET['getUniqueCType'])) {
 			'recv_type' => $row['recv_type']
 		);
 	}
-	$data = $p_group;
+	//$data = $p_group;
 
 	$results = array(
 		'error' => $error,
