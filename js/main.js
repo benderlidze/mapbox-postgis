@@ -170,6 +170,7 @@ fetchPointsDotsDropdown();//for Geo Point and Geo DOTS
 
 fetchDataForSearch()
 fetchDataForCType()
+fetchDataForRName()
 
 
 
@@ -805,6 +806,7 @@ async function fetchDataForDropdownLists() {
     }
 }
 
+
 async function fetchDataForSearch() {
     const f = await fetch(serverApiURL + "?getUniquePNameCountry=true");
     const j = await f.json()
@@ -823,10 +825,17 @@ async function fetchDataForCType() {
             console.log('123', 123);
         })
         autocompleteSimple(document.getElementById("search_c_cat"), j, 'c_cat', () => {
-            console.log('123', 123);
         })
         autocompleteSimple(document.getElementById("search_recv_type"), j, 'recv_type', () => {
-            console.log('123', 123);
+        })
+    }
+}
+async function fetchDataForRName() {
+    const f = await fetch(serverApiURL + "?getUniqueRName=true");
+    const j = await f.json()
+    if (j && j.error === "") {
+        console.log('j', j);
+        autocompleteSimple(document.getElementById("search_r_name"), j, 'r_name', () => {
         })
     }
 }
