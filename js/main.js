@@ -81,6 +81,17 @@ const allPolygonLayers = [];
 const allDOTSLayers = [];
 const allPOINTSLayers = [];
 
+//POLYGON FILTERS VARS
+const allPolygonsData = {};
+const polygonFilters = {
+    byCity: "",
+    byCountry: "",
+    byC_type: "",
+    byC_cat: "",
+    byRecv_type: "",
+    byR_name: "",
+}
+
 let currentPolygonUniqueID;
 
 
@@ -826,12 +837,84 @@ async function fetchDataForDropdownLists() {
     }
 }
 
+function updateCityInput(data, country) {
+    const cities = {
+        data: [...new Set(data.data
+            .filter(c => c.country === country)
+            .map((c) => c.p_name))]
+            .map(c => { return { 'p_name': c } })
+    }
+
+    autocompleteSimple(
+        document.getElementById("search_points_city"),
+        cities,
+        'p_name',
+        (city) => {
+            console.log('city', city);
+            polygonFilters.byCity = city.p_name;
+            filterPolygons()
+        }
+    )
+}
+
+function filterPolygons() {
+
+    console.log('polygonFilters', polygonFilters);
+    console.log('allPolygonLayers', allPolygonLayers);
+
+
+    allPolygonLayers.forEach(layer => {
+
+        const pData = allPolygonsData[layer]
+        console.log('pData!!!', pData);
+
+
+        const filtered = pData
+            .filter(p => {
+                //filter by Country
+                if (polygonFilters.byCountry !== "") return p.properties;
+                return p
+            })
+            .filter(p => {
+                //filter by City
+                if (polygonFilters.byCity !== "") return p.properties.name = polygonFilters.byCity;
+                return p
+            })
+
+        turf.featureCollection(filtered);
+        //map.getSource(layerId).setData();
+    })
+
+    //map.addSource(layerId, { 'type': 'geojson', 'data': collection });
+
+}
 
 async function fetchDataForSearch() {
     const f = await fetch(serverApiURL + "?getUniquePNameCountry=true");
     const j = await f.json()
     if (j && j.error === "") {
         dataForSearch = j;
+        console.log('j', j);
+
+        const countries = {
+            data: [...new Set(j.data.map((c) => c.country))]
+                .map(c => { return { 'country': c } })
+        }
+        console.log('countries', countries);
+        autocompleteSimple(
+            document.getElementById("search_points_country"),
+            countries,
+            'country',
+            country => {
+
+                updateCityInput(j, country.country)
+
+                polygonFilters.byCountry = country.country;
+
+                filterPolygons()
+            }
+        )
+
         autocomplete(document.getElementById("search_points_p"), j)//for Polygons
         autocomplete(document.getElementById("search_geo_city"), j, id => {
             console.log('id', id);
@@ -901,7 +984,16 @@ async function fetchPolygonData(layerId) {
     const f = await fetch(serverApiURL + "?getPolygons=true&layerId=" + layerId);
     const j = await f.json()
     console.log('j', j);
+
+
+
     if (j && j.error === "" && j.data.length > 0) {
+
+        if (!allPolygonsData.hasOwnProperty(layerId)) {
+            allPolygonsData[layerId] = {}
+        }
+        allPolygonsData[layerId] = j.data
+
 
         const collection = turf.featureCollection(j.data);
 
@@ -1158,7 +1250,7 @@ function autocompleteSimple(inp, data, element, callback) {
 
                     if (poly) {
                         if (callback && typeof callback === 'function') {
-                            callback()
+                            callback(poly)
                         }
                     }
 

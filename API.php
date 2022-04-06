@@ -341,7 +341,9 @@ if (isset($_GET['getPolygons'])) {
 	$error = '';
 
 	if ($table == "poly_b" || $table == "poly_an") {
-		$result = pg_query($dbconn, 'SELECT *,ST_AsGeoJSON(poly) as poly FROM "public"."poly_an" where poly_type=\'' . $table . '\'');
+		$result = pg_query($dbconn, 'SELECT *,ST_AsGeoJSON(poly) as poly FROM "public"."poly_an" 
+										LEFT JOIN "public"."ref_points_p" on poly_an.p_name = ref_points_p.p_name
+										where poly_type=\'' . $table . '\'');
 	} else {
 		$result = pg_query($dbconn, 'SELECT *,ST_AsGeoJSON(poly) as poly FROM "public"."' . $table . '"');
 	}
