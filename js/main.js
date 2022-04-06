@@ -872,17 +872,17 @@ function filterPolygons() {
         const filtered = pData
             .filter(p => {
                 //filter by Country
-                if (polygonFilters.byCountry !== "") return p.properties;
+                if (polygonFilters.byCountry !== "" && p.properties.country) return p.properties.country === polygonFilters.byCountry;
                 return p
             })
             .filter(p => {
                 //filter by City
-                if (polygonFilters.byCity !== "") return p.properties.name = polygonFilters.byCity;
+                if (polygonFilters.byCity !== "" && p.properties.p_name) return p.properties.p_name === polygonFilters.byCity;
                 return p
             })
-
-        turf.featureCollection(filtered);
-        //map.getSource(layerId).setData();
+        console.log('filtered', filtered);
+        const collection = turf.featureCollection(filtered);
+        map.getSource(layer).setData(collection);
     })
 
     //map.addSource(layerId, { 'type': 'geojson', 'data': collection });
@@ -915,7 +915,7 @@ async function fetchDataForSearch() {
             }
         )
 
-        autocomplete(document.getElementById("search_points_p"), j)//for Polygons
+        // autocomplete(document.getElementById("search_points_p"), j)//for Polygons
         autocomplete(document.getElementById("search_geo_city"), j, id => {
             console.log('id', id);
             filters.geoPointPID = id;
