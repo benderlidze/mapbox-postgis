@@ -865,6 +865,8 @@ function filterPolygons() {
 
     allPolygonLayers.forEach(layer => {
 
+        if (!allPolygonsData[layer]) return;
+
         const pData = allPolygonsData[layer]
         console.log('pData!!!', pData);
 
@@ -878,6 +880,26 @@ function filterPolygons() {
             .filter(p => {
                 //filter by City
                 if (polygonFilters.byCity !== "" && p.properties.p_name) return p.properties.p_name === polygonFilters.byCity;
+                return p
+            })
+            .filter(p => {
+                //filter by City
+                if (polygonFilters.byC_cat !== "" && p.properties.c_cat) return p.properties.c_cat === polygonFilters.byC_cat;
+                return p
+            })
+            .filter(p => {
+                //filter by City
+                if (polygonFilters.byC_type !== "" && p.properties.c_type) return p.properties.c_type === polygonFilters.byC_type;
+                return p
+            })
+            .filter(p => {
+                //filter by City
+                if (polygonFilters.byRecv_type !== "" && p.properties.recv_type) return p.properties.recv_type === polygonFilters.byRecv_type;
+                return p
+            })
+            .filter(p => {
+                //filter by City
+                if (polygonFilters.byR_name !== "" && p.properties.r_name) return p.properties.r_name === polygonFilters.byR_name;
                 return p
             })
         console.log('filtered', filtered);
@@ -906,11 +928,8 @@ async function fetchDataForSearch() {
             countries,
             'country',
             country => {
-
                 updateCityInput(j, country.country)
-
                 polygonFilters.byCountry = country.country;
-
                 filterPolygons()
             }
         )
@@ -929,13 +948,19 @@ async function fetchDataForCType() {
     if (j && j.error === "") {
 
         console.log('j', j);
-        autocompleteSimple(document.getElementById("search_c_type"), j, 'c_type', () => {
-            console.log('123', 123);
+        autocompleteSimple(document.getElementById("search_c_type"), j, 'c_type', (result) => {
+            polygonFilters.byC_type = result.c_type;
+            filterPolygons()
         })
-        autocompleteSimple(document.getElementById("search_c_cat"), j, 'c_cat', () => {
+        autocompleteSimple(document.getElementById("search_c_cat"), j, 'c_cat', (result) => {
+            polygonFilters.byC_cat = result.c_cat;
+            filterPolygons()
         })
-        autocompleteSimple(document.getElementById("search_recv_type"), j, 'recv_type', () => {
+        autocompleteSimple(document.getElementById("search_recv_type"), j, 'recv_type', (result) => {
+            polygonFilters.byRecv_type = result.recv_type;
+            filterPolygons()
         })
+
     }
 }
 async function fetchDataForRName() {
@@ -943,7 +968,9 @@ async function fetchDataForRName() {
     const j = await f.json()
     if (j && j.error === "") {
         console.log('j', j);
-        autocompleteSimple(document.getElementById("search_r_name"), j, 'r_name', () => {
+        autocompleteSimple(document.getElementById("search_r_name"), j, 'r_name', (result) => {
+            polygonFilters.byR_name = result.r_name;
+            filterPolygons()
         })
     }
 }
