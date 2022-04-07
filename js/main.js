@@ -845,6 +845,17 @@ function updateCityInput(data, country) {
             .map(c => { return { 'p_name': c } })
     }
 
+    //clear div 
+
+    const cityEl = document.getElementById("search_points_city")
+    if (cityEl && cityEl.parentElement.querySelector('div')) {
+        const divA = cityEl.parentElement.querySelector('div').remove()
+        //divA.querySelector('div').remove()
+    }
+
+
+    console.log('1111',1111);
+
     autocompleteSimple(
         document.getElementById("search_points_city"),
         cities,
@@ -874,32 +885,32 @@ function filterPolygons() {
         const filtered = pData
             .filter(p => {
                 //filter by Country
-                if (polygonFilters.byCountry !== "" && p.properties.country) return p.properties.country === polygonFilters.byCountry;
+                if (polygonFilters.byCountry && polygonFilters.byCountry !== "" && p.properties.country) return p.properties.country === polygonFilters.byCountry;
                 return p
             })
             .filter(p => {
                 //filter by City
-                if (polygonFilters.byCity !== "" && p.properties.p_name) return p.properties.p_name === polygonFilters.byCity;
+                if (polygonFilters.byCity && polygonFilters.byCity !== "" && p.properties.p_name) return p.properties.p_name === polygonFilters.byCity;
                 return p
             })
             .filter(p => {
                 //filter by City
-                if (polygonFilters.byC_cat !== "" && p.properties.c_cat) return p.properties.c_cat === polygonFilters.byC_cat;
+                if (polygonFilters.byC_cat && polygonFilters.byC_cat !== "" && p.properties.c_cat) return p.properties.c_cat === polygonFilters.byC_cat;
                 return p
             })
             .filter(p => {
                 //filter by City
-                if (polygonFilters.byC_type !== "" && p.properties.c_type) return p.properties.c_type === polygonFilters.byC_type;
+                if (polygonFilters.byC_type && polygonFilters.byC_type !== "" && p.properties.c_type) return p.properties.c_type === polygonFilters.byC_type;
                 return p
             })
             .filter(p => {
                 //filter by City
-                if (polygonFilters.byRecv_type !== "" && p.properties.recv_type) return p.properties.recv_type === polygonFilters.byRecv_type;
+                if (polygonFilters.byRecv_type && polygonFilters.byRecv_type !== "" && p.properties.recv_type) return p.properties.recv_type === polygonFilters.byRecv_type;
                 return p
             })
             .filter(p => {
                 //filter by City
-                if (polygonFilters.byR_name !== "" && p.properties.r_name) return p.properties.r_name === polygonFilters.byR_name;
+                if (polygonFilters.byR_name && polygonFilters.byR_name !== "" && p.properties.r_name) return p.properties.r_name === polygonFilters.byR_name;
                 return p
             })
         console.log('filtered', filtered);
@@ -1224,6 +1235,20 @@ function autocompleteSimple(inp, data, element, callback) {
     the text field element and an array of possible autocompleted values:*/
     var currentFocus;
 
+    const parent = inp.parentElement;
+    if (parent) {
+        const div = document.createElement("div")
+        div.style.cursor = 'pointer'
+        div.innerText = "X"
+        div.addEventListener("click", () => {
+            callback("")
+            console.log('inp', inp);
+            inp.value = ""
+        })
+        parent.appendChild(div)
+
+    }
+
     const arr = data.data.map(d => {
         return d[element]
     });
@@ -1351,6 +1376,8 @@ function autocomplete(inp, data, callback) {
     /*the autocomplete function takes two arguments,
     the text field element and an array of possible autocompleted values:*/
     var currentFocus;
+
+    console.log('inp', inp);
 
     const arr = data.data.map(d => {
         return `${d.p_name}, ${d.country}`
